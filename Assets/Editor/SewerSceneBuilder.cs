@@ -107,6 +107,55 @@ public static class SewerSceneBuilder
         go.transform.rotation = Quaternion.Euler(20f, 0f, 0f);
     }
 
+    // ── Sewer Theme on SampleScene ──────────────────────────────────────────
+
+    [MenuItem("Sewer/Apply Theme to SampleScene")]
+    static void ApplyTheme()
+    {
+        var wallMat    = CreateSewerMat("SewerWall",    "Assets/Sewer/Textures/Sewer/bricks.jpg",          "Assets/Sewer/Textures/Sewer/brick_modern.jpg",    0.05f);
+        var floorMat   = CreateSewerMat("SewerFloor",   "Assets/Sewer/Textures/Sewer/concrete_dirty.jpg",  "Assets/Sewer/Textures/Sewer/concrete_base.png",   0.08f);
+        var ceilingMat = CreateSewerMat("SewerCeiling", "Assets/Sewer/Textures/Sewer/concrete_base_02.jpg","Assets/Sewer/Textures/Sewer/concrete_base_03.jpg", 0.03f);
+        AssetDatabase.SaveAssets();
+
+        var spawner = Object.FindFirstObjectByType<PlayerSpawner>();
+        if (spawner == null) { Debug.LogWarning("[SewerSceneBuilder] PlayerSpawner not found — open SampleScene first."); return; }
+
+        var theme = spawner.gameObject.GetComponent<SewerTheme>() ?? spawner.gameObject.AddComponent<SewerTheme>();
+
+        var so = new SerializedObject(theme);
+        so.FindProperty("wallMaterial").objectReferenceValue    = wallMat;
+        so.FindProperty("floorMaterial").objectReferenceValue   = floorMat;
+        so.FindProperty("ceilingMaterial").objectReferenceValue = ceilingMat;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+
+        Debug.Log("[SewerSceneBuilder] SewerTheme applied to PlayerSpawner. Save scene and press Play.");
+    }
+
+    static Material CreateSewerMat(string name, string basePath, string normPath, float smoothness)
+    {
+        System.IO.Directory.CreateDirectory("Assets/Sewer/Materials");
+        var path = "Assets/Sewer/Materials/" + name + ".mat";
+
+        var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (existing != null) return existing;
+
+        var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        mat.name = name;
+        mat.SetFloat("_Smoothness", smoothness);
+        mat.SetFloat("_Metallic", 0f);
+        mat.SetTextureScale("_BaseMap", new Vector2(3f, 3f));
+        Assign(mat, "_BaseMap", basePath);
+
+        var norm = AssetDatabase.LoadAssetAtPath<Texture2D>(normPath);
+        if (norm != null) { mat.SetTexture("_BumpMap", norm); mat.EnableKeyword("_NORMALMAP"); }
+
+        AssetDatabase.CreateAsset(mat, path);
+        return mat;
+    }
+
     static void Assign(Material mat, string prop, string path)
     {
         var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
