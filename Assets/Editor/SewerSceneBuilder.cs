@@ -149,9 +149,9 @@ public static class SewerSceneBuilder
         // Назначаем MazeGenerator → MazeManager
         if (mazeGen != null && mazeMgr != null)
         {
-            var so = new SerializedObject(mazeMgr);
-            so.FindProperty("mazeGenerator").objectReferenceValue = mazeGen;
-            so.ApplyModifiedProperties();
+            var soMaze = new SerializedObject(mazeMgr);
+            soMaze.FindProperty("mazeGenerator").objectReferenceValue = mazeGen;
+            soMaze.ApplyModifiedProperties();
         }
 
         // PlayerSpawner GO
@@ -165,18 +165,18 @@ public static class SewerSceneBuilder
             "Assets/StarterAssets/ThirdPersonController/Prefabs/Player_Arissa.prefab");
         if (spawner != null && playerPrefab != null)
         {
-            var so = new SerializedObject(spawner);
-            so.FindProperty("playerPrefab").objectReferenceValue = playerPrefab;
-            so.ApplyModifiedProperties();
+            var soSpawner = new SerializedObject(spawner);
+            soSpawner.FindProperty("playerPrefab").objectReferenceValue = playerPrefab;
+            soSpawner.ApplyModifiedProperties();
         }
 
         // SewerTheme — только на этой сцене
         var theme = spawnerGO.AddComponent<SewerTheme>();
-        var so = new SerializedObject(theme);
-        so.FindProperty("wallMaterial").objectReferenceValue    = wallMat;
-        so.FindProperty("floorMaterial").objectReferenceValue   = floorMat;
-        so.FindProperty("ceilingMaterial").objectReferenceValue = ceilingMat;
-        so.ApplyModifiedProperties();
+        var soTheme = new SerializedObject(theme);
+        soTheme.FindProperty("wallMaterial").objectReferenceValue    = wallMat;
+        soTheme.FindProperty("floorMaterial").objectReferenceValue   = floorMat;
+        soTheme.FindProperty("ceilingMaterial").objectReferenceValue = ceilingMat;
+        soTheme.ApplyModifiedProperties();
 
         // Main Camera
         var camGO = new GameObject("Main Camera");
