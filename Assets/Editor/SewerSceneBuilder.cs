@@ -139,20 +139,36 @@ public static class SewerSceneBuilder
         lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
         // Копируем нужные объекты из SampleScene через prefab-подход:
-        // MazeManager GO с MazeGenerator + MazeManager + SewerTheme
+        // MazeManager GO
         var mazeManagerGO = new GameObject("MazeManager");
-        // Скрипты добавятся автоматически через их собственный Start/Awake
-        // Нужно добавить компоненты вручную
-        AddComponentByName(mazeManagerGO, "MazeGenerator");
-        AddComponentByName(mazeManagerGO, "MazeManager");
+        var mazeGen     = (MazeGenerator)AddComponentByName(mazeManagerGO, "MazeGenerator");
+        var mazeMgr     = (MazeManager)  AddComponentByName(mazeManagerGO, "MazeManager");
         AddComponentByName(mazeManagerGO, "AtmosphereSetup");
         AddComponentByName(mazeManagerGO, "GameManager");
 
+        // Назначаем MazeGenerator → MazeManager
+        if (mazeGen != null && mazeMgr != null)
+        {
+            var so = new SerializedObject(mazeMgr);
+            so.FindProperty("mazeGenerator").objectReferenceValue = mazeGen;
+            so.ApplyModifiedProperties();
+        }
+
         // PlayerSpawner GO
         var spawnerGO = new GameObject("PlayerSpawner");
-        AddComponentByName(spawnerGO, "PlayerSpawner");
+        var spawner = (PlayerSpawner)AddComponentByName(spawnerGO, "PlayerSpawner");
         AddComponentByName(spawnerGO, "PlayerTorch");
         AddComponentByName(spawnerGO, "MinimapSystem");
+
+        // Назначаем Player prefab → PlayerSpawner
+        var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+            "Assets/StarterAssets/ThirdPersonController/Prefabs/Player_Arissa.prefab");
+        if (spawner != null && playerPrefab != null)
+        {
+            var so = new SerializedObject(spawner);
+            so.FindProperty("playerPrefab").objectReferenceValue = playerPrefab;
+            so.ApplyModifiedProperties();
+        }
 
         // SewerTheme — только на этой сцене
         var theme = spawnerGO.AddComponent<SewerTheme>();
@@ -178,11 +194,12 @@ public static class SewerSceneBuilder
         Debug.Log("[SewerSceneBuilder] SewerScene saved. Open it and press Play to test.");
     }
 
-    static void AddComponentByName(GameObject go, string typeName)
+    static Component AddComponentByName(GameObject go, string typeName)
     {
         var type = System.Type.GetType(typeName + ", Assembly-CSharp");
-        if (type != null) go.AddComponent(type);
-        else Debug.LogWarning("[SewerSceneBuilder] Component not found: " + typeName);
+        if (type != null) return go.AddComponent(type);
+        Debug.LogWarning("[SewerSceneBuilder] Component not found: " + typeName);
+        return null;
     }
 
     static Material CreateSewerMat(string name, string basePath, Color tint, float smoothness)
