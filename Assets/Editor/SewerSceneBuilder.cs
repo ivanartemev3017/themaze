@@ -4,217 +4,191 @@ using UnityEditor.SceneManagement;
 
 public static class SewerSceneBuilder
 {
-    const string SEWER_MODEL = "Assets/Sewer/Models/Sewers.fbx";
-    const string WATER_BASE  = "Assets/Sewer/Textures/Water/Swamp_Water_tgmjffbqx_1K_BaseColor.jpg";
-    const string WATER_NORM  = "Assets/Sewer/Textures/Water/Swamp_Water_tgmjffbqx_1K_Normal.jpg";
-    const string SCENE_PATH  = "Assets/Scenes/SewerTest.unity";
-    const string MAT_PATH    = "Assets/Sewer/Materials/SewerWater.mat";
+    const string SCENE_PATH   = "Assets/Scenes/SewerScene.unity";
+    const string MAT_DIR      = "Assets/Sewer/Materials/";
+    const string WATER_BASE   = "Assets/Sewer/Textures/Water/Swamp_Water_tgmjffbqx_1K_BaseColor.jpg";
+    const string WATER_NORM   = "Assets/Sewer/Textures/Water/Swamp_Water_tgmjffbqx_1K_Normal.jpg";
+    const string TEX_WALL     = "Assets/Sewer/Textures/Sewer/concrete_dirty.jpg";
+    const string TEX_FLOOR    = "Assets/Sewer/Textures/Sewer/brick_pavement.jpg";
+    const string TEX_CEILING  = "Assets/Sewer/Textures/Sewer/concrete_base_02.jpg";
+    const string PLAYER_PREFAB= "Assets/StarterAssets/ThirdPersonController/Prefabs/Player_Arissa.prefab";
 
-    [MenuItem("Sewer/Build Test Scene")]
-    static void Build()
-    {
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-
-        SetupEnvironment();
-        PlaceSewerModel();
-        var waterMat = BuildWaterMaterial();
-        PlaceWater(waterMat);
-        SetupCamera();
-
-        System.IO.Directory.CreateDirectory("Assets/Scenes");
-        EditorSceneManager.SaveScene(scene, SCENE_PATH);
-        AssetDatabase.Refresh();
-        Debug.Log("[SewerSceneBuilder] Saved: " + SCENE_PATH);
-    }
-
-    static void SetupEnvironment()
-    {
-        RenderSettings.fog = true;
-        RenderSettings.fogMode = FogMode.Exponential;
-        RenderSettings.fogDensity = 0.05f;
-        RenderSettings.fogColor = new Color(0.08f, 0.10f, 0.12f);
-        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-        RenderSettings.ambientLight = new Color(0.18f, 0.20f, 0.22f);
-
-        var go = new GameObject("Directional Light");
-        var light = go.AddComponent<Light>();
-        light.type = LightType.Directional;
-        light.intensity = 0.5f;
-        light.color = new Color(0.5f, 0.55f, 0.65f);
-        light.shadows = LightShadows.None;
-        go.transform.rotation = Quaternion.Euler(45f, -30f, 0f);
-    }
-
-    static void PlaceSewerModel()
-    {
-        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SEWER_MODEL);
-        if (prefab == null)
-        {
-            Debug.LogWarning("[SewerSceneBuilder] Model not found: " + SEWER_MODEL);
-            return;
-        }
-        var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-        go.name = "SewerLevel";
-        go.transform.position = Vector3.zero;
-        go.transform.localScale = Vector3.one;
-    }
-
-    static Material BuildWaterMaterial()
-    {
-        System.IO.Directory.CreateDirectory("Assets/Sewer/Materials");
-
-        var existing = AssetDatabase.LoadAssetAtPath<Material>(MAT_PATH);
-        if (existing != null) return existing;
-
-        var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        mat.name = "SewerWater";
-        mat.SetColor("_BaseColor", new Color(0.22f, 0.35f, 0.28f, 1f));
-        mat.SetFloat("_Smoothness", 0.85f);
-        mat.SetFloat("_Metallic", 0f);
-        mat.SetTextureScale("_BaseMap", new Vector2(4f, 4f));
-
-        Assign(mat, "_BaseMap", WATER_BASE);
-
-        var norm = AssetDatabase.LoadAssetAtPath<Texture2D>(WATER_NORM);
-        if (norm != null)
-        {
-            mat.SetTexture("_BumpMap", norm);
-            mat.EnableKeyword("_NORMALMAP");
-        }
-
-        AssetDatabase.CreateAsset(mat, MAT_PATH);
-        return mat;
-    }
-
-    static void PlaceWater(Material mat)
-    {
-        var go = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        go.name = "SewerWater";
-        go.transform.position = new Vector3(0f, -0.1f, 0f);
-        go.transform.localScale = new Vector3(20f, 1f, 20f);
-        go.GetComponent<Renderer>().sharedMaterial = mat;
-        Object.DestroyImmediate(go.GetComponent<Collider>());
-        go.AddComponent<SewerWater>();
-    }
-
-    static void SetupCamera()
-    {
-        var go = new GameObject("Main Camera");
-        go.tag = "MainCamera";
-        go.AddComponent<Camera>();
-        go.AddComponent<AudioListener>();
-        go.transform.position = new Vector3(0f, 5f, -10f);
-        go.transform.rotation = Quaternion.Euler(20f, 0f, 0f);
-    }
-
-    // ── Sewer Theme on SampleScene ──────────────────────────────────────────
+    // ── Main entry ────────────────────────────────────────────────────────────
 
     [MenuItem("Sewer/Create Sewer Scene")]
     static void CreateSewerScene()
     {
+        System.IO.Directory.CreateDirectory(MAT_DIR);
+        System.IO.Directory.CreateDirectory("Assets/Scenes");
+
+        // Materials
+        var wallMat    = MakeMat("SewerWall",    TEX_WALL,    new Color(0.32f, 0.34f, 0.34f), 0.04f);
+        var floorMat   = MakeMat("SewerFloor",   TEX_FLOOR,   new Color(0.28f, 0.30f, 0.30f), 0.06f);
+        var ceilMat    = MakeMat("SewerCeiling", TEX_CEILING, new Color(0.20f, 0.22f, 0.23f), 0.03f);
+        var waterMat   = MakeWaterMat();
+        var gateMat    = MakeGateMat();
+        AssetDatabase.SaveAssets();
+
+        // New scene
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        // Атмосфера — тёмно, туман
-        RenderSettings.fog = true;
-        RenderSettings.fogMode = FogMode.Exponential;
-        RenderSettings.fogDensity = 0.015f;
-        RenderSettings.fogColor = new Color(0.04f, 0.06f, 0.08f);
+        // Environment
+        RenderSettings.fog         = true;
+        RenderSettings.fogMode     = FogMode.Exponential;
+        RenderSettings.fogDensity  = 0.018f;
+        RenderSettings.fogColor    = new Color(0.03f, 0.05f, 0.06f);
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-        RenderSettings.ambientLight = new Color(0.08f, 0.10f, 0.12f);
+        RenderSettings.ambientLight= new Color(0.07f, 0.09f, 0.10f);
 
-        // Directional Light — слабый, холодный
-        var lightGO = new GameObject("Directional Light");
-        var light = lightGO.AddComponent<Light>();
-        light.type = LightType.Directional;
-        light.intensity = 0.15f;
-        light.color = new Color(0.4f, 0.5f, 0.6f);
-        light.shadows = LightShadows.None;
-        lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+        // Faint directional light (nearly everything lit by point lights)
+        var dLight = new GameObject("Directional Light").AddComponent<Light>();
+        dLight.type      = LightType.Directional;
+        dLight.intensity = 0.08f;
+        dLight.color     = new Color(0.3f, 0.4f, 0.5f);
+        dLight.shadows   = LightShadows.None;
+        dLight.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-        // Сама модель канализации
-        var sewerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Sewer/Models/Sewers.fbx");
-        if (sewerPrefab != null)
-        {
-            var sewer = (GameObject)PrefabUtility.InstantiatePrefab(sewerPrefab);
-            sewer.name = "SewerLevel";
-            sewer.transform.position = Vector3.zero;
-        }
+        // Level Manager
+        var managerGO = new GameObject("SewerLevelManager");
+        managerGO.AddComponent<SewerLevelManager>();
 
-        // Вода
-        var waterMat = BuildWaterMaterial();
-        var waterGO = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        waterGO.name = "SewerWater";
-        waterGO.transform.position = new Vector3(0f, -0.3f, 0f);
-        waterGO.transform.localScale = new Vector3(20f, 1f, 20f);
-        waterGO.GetComponent<Renderer>().sharedMaterial = waterMat;
-        Object.DestroyImmediate(waterGO.GetComponent<Collider>());
-        waterGO.AddComponent<SewerWater>();
+        // Maze Generator
+        var mazeGO  = new GameObject("SewerMazeGenerator");
+        var mazeGen = mazeGO.AddComponent<SewerMazeGenerator>();
 
-        // Спавнер игрока — без MazeManager
-        var spawnerGO = new GameObject("SewerSpawner");
-        var sewerSpawner = spawnerGO.AddComponent<SewerPlayerSpawner>();
+        var soMaze = new SerializedObject(mazeGen);
+        soMaze.FindProperty("wallMaterial").objectReferenceValue    = wallMat;
+        soMaze.FindProperty("floorMaterial").objectReferenceValue   = floorMat;
+        soMaze.FindProperty("ceilingMaterial").objectReferenceValue = ceilMat;
+        soMaze.FindProperty("waterMaterial").objectReferenceValue   = waterMat;
+        soMaze.FindProperty("gateMaterial").objectReferenceValue    = gateMat;
+        soMaze.ApplyModifiedProperties();
+
+        // Spawner
+        var spawnerGO  = new GameObject("SewerSpawner");
+        var spawner    = spawnerGO.AddComponent<SewerPlayerSpawner>();
         spawnerGO.AddComponent<PlayerTorch>();
 
-        var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
-            "Assets/StarterAssets/ThirdPersonController/Prefabs/Player_Arissa.prefab");
-        if (playerPrefab != null)
-        {
-            var soSpawner = new SerializedObject(sewerSpawner);
-            soSpawner.FindProperty("playerPrefab").objectReferenceValue = playerPrefab;
-            soSpawner.ApplyModifiedProperties();
-        }
+        var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PLAYER_PREFAB);
 
-        // Камера
+        var soSpawner = new SerializedObject(spawner);
+        soSpawner.FindProperty("playerPrefab").objectReferenceValue    = playerPrefab;
+        soSpawner.FindProperty("mazeGenerator").objectReferenceValue   = mazeGen;
+        soSpawner.ApplyModifiedProperties();
+
+        // Enemy
+        var enemyGO  = new GameObject("SewerEnemy");
+        var enemy    = enemyGO.AddComponent<SewerEnemy>();
+        var enemyCC  = enemyGO.AddComponent<CharacterController>();
+        enemyCC.height = 1.8f;
+        enemyCC.radius = 0.4f;
+        enemyCC.center = new Vector3(0, 0.9f, 0);
+
+        // Enemy visual — capsule placeholder
+        var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        capsule.transform.SetParent(enemyGO.transform, false);
+        capsule.transform.localPosition = new Vector3(0, 0.9f, 0);
+        capsule.transform.localScale    = new Vector3(0.6f, 0.85f, 0.6f);
+        var capMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        capMat.SetColor("_BaseColor", new Color(0.08f, 0.08f, 0.10f));
+        capMat.SetFloat("_Metallic",  0.3f);
+        capMat.SetFloat("_Smoothness",0.2f);
+        capsule.GetComponent<MeshRenderer>().sharedMaterial = capMat;
+        Object.DestroyImmediate(capsule.GetComponent<Collider>());
+        // Enemy eyes — two dim red lights
+        AddEyeLight(enemyGO.transform, new Vector3( 0.08f, 1.55f, 0.3f));
+        AddEyeLight(enemyGO.transform, new Vector3(-0.08f, 1.55f, 0.3f));
+
+        var soEnemy = new SerializedObject(enemy);
+        soEnemy.FindProperty("maze").objectReferenceValue = mazeGen;
+        soEnemy.ApplyModifiedProperties();
+
+        // Main Camera + FollowCamera
         var camGO = new GameObject("Main Camera");
         camGO.tag = "MainCamera";
         camGO.AddComponent<Camera>();
         camGO.AddComponent<AudioListener>();
-        AddComponentByName(camGO, "FollowCamera");
+        var fcType = System.Type.GetType("FollowCamera, Assembly-CSharp");
+        if (fcType != null) camGO.AddComponent(fcType);
 
-        // Post-processing
-        var volGO = new GameObject("Global Volume");
+        // Post-processing volume
+        var volGO  = new GameObject("Global Volume");
         volGO.AddComponent<UnityEngine.Rendering.Volume>();
-        AddComponentByName(volGO, "AtmosphereSetup");
+        var atType = System.Type.GetType("AtmosphereSetup, Assembly-CSharp");
+        if (atType != null) volGO.AddComponent(atType);
 
-        const string scenePath = "Assets/Scenes/SewerScene.unity";
-        System.IO.Directory.CreateDirectory("Assets/Scenes");
-        EditorSceneManager.SaveScene(scene, scenePath);
+        EditorSceneManager.SaveScene(scene, SCENE_PATH);
         AssetDatabase.Refresh();
-        Debug.Log("[SewerSceneBuilder] SewerScene created. Open Assets/Scenes/SewerScene.unity and press Play.");
+        Debug.Log("[SewerSceneBuilder] Done → " + SCENE_PATH);
     }
 
-    static Component AddComponentByName(GameObject go, string typeName)
-    {
-        var type = System.Type.GetType(typeName + ", Assembly-CSharp");
-        if (type != null) return go.AddComponent(type);
-        Debug.LogWarning("[SewerSceneBuilder] Component not found: " + typeName);
-        return null;
-    }
+    // ── Material helpers ──────────────────────────────────────────────────────
 
-    static Material CreateSewerMat(string name, string basePath, Color tint, float smoothness)
+    static Material MakeMat(string name, string texPath, Color tint, float smooth)
     {
-        System.IO.Directory.CreateDirectory("Assets/Sewer/Materials");
-        var path = "Assets/Sewer/Materials/" + name + ".mat";
-
-        // Пересоздать если уже есть (обновить)
+        var path = MAT_DIR + name + ".mat";
         AssetDatabase.DeleteAsset(path);
 
         var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        mat.name = name;
         mat.SetColor("_BaseColor", tint);
-        mat.SetFloat("_Smoothness", smoothness);
-        mat.SetFloat("_Metallic", 0f);
-        mat.SetTextureScale("_BaseMap", new Vector2(4f, 4f));
-        // Без normal map — убирает эффект подушки
-        Assign(mat, "_BaseMap", basePath);
+        mat.SetFloat("_Smoothness", smooth);
+        mat.SetFloat("_Metallic",   0f);
+        mat.SetTextureScale("_BaseMap", new Vector2(3f, 3f));
+
+        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
+        if (tex != null) mat.SetTexture("_BaseMap", tex);
 
         AssetDatabase.CreateAsset(mat, path);
         return mat;
     }
 
-    static void Assign(Material mat, string prop, string path)
+    static Material MakeWaterMat()
     {
-        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-        if (tex != null) mat.SetTexture(prop, tex);
+        var path = MAT_DIR + "SewerWater.mat";
+        AssetDatabase.DeleteAsset(path);
+
+        var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        mat.SetColor("_BaseColor",  new Color(0.15f, 0.28f, 0.20f));
+        mat.SetFloat("_Smoothness", 0.88f);
+        mat.SetFloat("_Metallic",   0f);
+        mat.SetTextureScale("_BaseMap", new Vector2(5f, 5f));
+
+        var tex  = AssetDatabase.LoadAssetAtPath<Texture2D>(WATER_BASE);
+        var norm = AssetDatabase.LoadAssetAtPath<Texture2D>(WATER_NORM);
+        if (tex  != null) mat.SetTexture("_BaseMap", tex);
+        if (norm != null) { mat.SetTexture("_BumpMap", norm); mat.EnableKeyword("_NORMALMAP"); mat.SetFloat("_BumpScale", 0.4f); }
+
+        AssetDatabase.CreateAsset(mat, path);
+        return mat;
+    }
+
+    static Material MakeGateMat()
+    {
+        var path = MAT_DIR + "SewerGate.mat";
+        AssetDatabase.DeleteAsset(path);
+
+        var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        mat.SetColor("_BaseColor",  new Color(0.12f, 0.13f, 0.15f));
+        mat.SetFloat("_Metallic",   0.85f);
+        mat.SetFloat("_Smoothness", 0.25f);
+
+        var albedo = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Sewer/Textures/Fence/IronFenceAlbedo.png");
+        if (albedo != null) mat.SetTexture("_BaseMap", albedo);
+
+        AssetDatabase.CreateAsset(mat, path);
+        return mat;
+    }
+
+    static void AddEyeLight(Transform parent, Vector3 localPos)
+    {
+        var go = new GameObject("Eye");
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = localPos;
+        var l = go.AddComponent<Light>();
+        l.type      = LightType.Point;
+        l.color     = new Color(0.9f, 0.1f, 0.05f);
+        l.intensity = 1.5f;
+        l.range     = 3f;
+        l.shadows   = LightShadows.None;
     }
 }
