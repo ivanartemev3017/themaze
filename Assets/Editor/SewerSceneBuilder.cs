@@ -109,48 +109,98 @@ public static class SewerSceneBuilder
 
     // ── Sewer Theme on SampleScene ──────────────────────────────────────────
 
-    [MenuItem("Sewer/Apply Theme to SampleScene")]
-    static void ApplyTheme()
+    [MenuItem("Sewer/Create Sewer Scene")]
+    static void CreateSewerScene()
     {
-        var wallMat    = CreateSewerMat("SewerWall",    "Assets/Sewer/Textures/Sewer/bricks.jpg",          "Assets/Sewer/Textures/Sewer/brick_modern.jpg",    0.05f);
-        var floorMat   = CreateSewerMat("SewerFloor",   "Assets/Sewer/Textures/Sewer/concrete_dirty.jpg",  "Assets/Sewer/Textures/Sewer/concrete_base.png",   0.08f);
-        var ceilingMat = CreateSewerMat("SewerCeiling", "Assets/Sewer/Textures/Sewer/concrete_base_02.jpg","Assets/Sewer/Textures/Sewer/concrete_base_03.jpg", 0.03f);
+        // Материалы — тёмный бетон без normal map
+        var wallMat    = CreateSewerMat("SewerWall",    "Assets/Sewer/Textures/Sewer/concrete_dirty.jpg",  new Color(0.35f, 0.38f, 0.38f), 0.04f);
+        var floorMat   = CreateSewerMat("SewerFloor",   "Assets/Sewer/Textures/Sewer/brick_pavement.jpg",  new Color(0.30f, 0.32f, 0.32f), 0.06f);
+        var ceilingMat = CreateSewerMat("SewerCeiling", "Assets/Sewer/Textures/Sewer/concrete_base_02.jpg",new Color(0.25f, 0.27f, 0.28f), 0.03f);
         AssetDatabase.SaveAssets();
 
-        var spawner = Object.FindFirstObjectByType<PlayerSpawner>();
-        if (spawner == null) { Debug.LogWarning("[SewerSceneBuilder] PlayerSpawner not found — open SampleScene first."); return; }
+        // Новая пустая сцена
+        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        var theme = spawner.gameObject.GetComponent<SewerTheme>() ?? spawner.gameObject.AddComponent<SewerTheme>();
+        // Освещение — тёмное, холодное
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.Exponential;
+        RenderSettings.fogDensity = 0.012f;
+        RenderSettings.fogColor = new Color(0.05f, 0.07f, 0.09f);
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        RenderSettings.ambientLight = new Color(0.10f, 0.12f, 0.14f);
 
+        // Directional Light слабый
+        var lightGO = new GameObject("Directional Light");
+        var light = lightGO.AddComponent<Light>();
+        light.type = LightType.Directional;
+        light.intensity = 0.15f;
+        light.color = new Color(0.4f, 0.5f, 0.6f);
+        light.shadows = LightShadows.None;
+        lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+
+        // Копируем нужные объекты из SampleScene через prefab-подход:
+        // MazeManager GO с MazeGenerator + MazeManager + SewerTheme
+        var mazeManagerGO = new GameObject("MazeManager");
+        // Скрипты добавятся автоматически через их собственный Start/Awake
+        // Нужно добавить компоненты вручную
+        AddComponentByName(mazeManagerGO, "MazeGenerator");
+        AddComponentByName(mazeManagerGO, "MazeManager");
+        AddComponentByName(mazeManagerGO, "AtmosphereSetup");
+        AddComponentByName(mazeManagerGO, "GameManager");
+
+        // PlayerSpawner GO
+        var spawnerGO = new GameObject("PlayerSpawner");
+        AddComponentByName(spawnerGO, "PlayerSpawner");
+        AddComponentByName(spawnerGO, "PlayerTorch");
+        AddComponentByName(spawnerGO, "MinimapSystem");
+
+        // SewerTheme — только на этой сцене
+        var theme = spawnerGO.AddComponent<SewerTheme>();
         var so = new SerializedObject(theme);
         so.FindProperty("wallMaterial").objectReferenceValue    = wallMat;
         so.FindProperty("floorMaterial").objectReferenceValue   = floorMat;
         so.FindProperty("ceilingMaterial").objectReferenceValue = ceilingMat;
         so.ApplyModifiedProperties();
 
-        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+        // Main Camera
+        var camGO = new GameObject("Main Camera");
+        camGO.tag = "MainCamera";
+        camGO.AddComponent<Camera>();
+        camGO.AddComponent<AudioListener>();
+        AddComponentByName(camGO, "FollowCamera");
 
-        Debug.Log("[SewerSceneBuilder] SewerTheme applied to PlayerSpawner. Save scene and press Play.");
+        // Global Volume
+        new GameObject("Global Volume").AddComponent<UnityEngine.Rendering.Volume>();
+
+        const string scenePath = "Assets/Scenes/SewerScene.unity";
+        EditorSceneManager.SaveScene(scene, scenePath);
+        AssetDatabase.Refresh();
+        Debug.Log("[SewerSceneBuilder] SewerScene saved. Open it and press Play to test.");
     }
 
-    static Material CreateSewerMat(string name, string basePath, string normPath, float smoothness)
+    static void AddComponentByName(GameObject go, string typeName)
+    {
+        var type = System.Type.GetType(typeName + ", Assembly-CSharp");
+        if (type != null) go.AddComponent(type);
+        else Debug.LogWarning("[SewerSceneBuilder] Component not found: " + typeName);
+    }
+
+    static Material CreateSewerMat(string name, string basePath, Color tint, float smoothness)
     {
         System.IO.Directory.CreateDirectory("Assets/Sewer/Materials");
         var path = "Assets/Sewer/Materials/" + name + ".mat";
 
-        var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
-        if (existing != null) return existing;
+        // Пересоздать если уже есть (обновить)
+        AssetDatabase.DeleteAsset(path);
 
         var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         mat.name = name;
+        mat.SetColor("_BaseColor", tint);
         mat.SetFloat("_Smoothness", smoothness);
         mat.SetFloat("_Metallic", 0f);
-        mat.SetTextureScale("_BaseMap", new Vector2(3f, 3f));
+        mat.SetTextureScale("_BaseMap", new Vector2(4f, 4f));
+        // Без normal map — убирает эффект подушки
         Assign(mat, "_BaseMap", basePath);
-
-        var norm = AssetDatabase.LoadAssetAtPath<Texture2D>(normPath);
-        if (norm != null) { mat.SetTexture("_BumpMap", norm); mat.EnableKeyword("_NORMALMAP"); }
 
         AssetDatabase.CreateAsset(mat, path);
         return mat;
