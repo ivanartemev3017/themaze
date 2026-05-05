@@ -79,7 +79,8 @@ public static class SewerSceneBuilder
         // Enemy
         var enemyGO  = new GameObject("SewerEnemy");
         var enemy    = enemyGO.AddComponent<SewerEnemy>();
-        var enemyCC  = enemyGO.AddComponent<CharacterController>();
+        // [RequireComponent] already added CharacterController — just configure it
+        var enemyCC  = enemyGO.GetComponent<CharacterController>();
         enemyCC.height = 1.8f;
         enemyCC.radius = 0.4f;
         enemyCC.center = new Vector3(0, 0.9f, 0);
