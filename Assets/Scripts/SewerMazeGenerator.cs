@@ -7,7 +7,7 @@ public class SewerMazeGenerator : MonoBehaviour
     public int mazeWidth  = 9;
     public int mazeHeight = 9;
     public float cellSize    = 4f;
-    public float wallHeight  = 3.4f;
+    public float wallHeight  = 5.5f;
     public float wallThick   = 0.35f;
 
     [Header("Materials")]
@@ -18,7 +18,7 @@ public class SewerMazeGenerator : MonoBehaviour
     public Material gateMaterial;
 
     [Header("Gates")]
-    [Range(0f, 0.4f)] public float gateDensity = 0.22f;
+    [Range(0f, 0.4f)] public float gateDensity = 0.15f;
 
     public Vector3 StartWorldPosition { get; private set; }
     public Vector3 ExitWorldPosition  { get; private set; }

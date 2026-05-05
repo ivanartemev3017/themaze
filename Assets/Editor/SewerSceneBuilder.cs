@@ -68,6 +68,7 @@ public static class SewerSceneBuilder
         var spawnerGO  = new GameObject("SewerSpawner");
         var spawner    = spawnerGO.AddComponent<SewerPlayerSpawner>();
         spawnerGO.AddComponent<PlayerTorch>();
+        spawnerGO.AddComponent<MinimapSystem>();
 
         var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PLAYER_PREFAB);
 

@@ -4,8 +4,8 @@ using DG.Tweening;
 public class SewerGate : MonoBehaviour
 {
     [Header("Timing")]
-    public float closedDuration = 10f;
-    public float openDuration   = 6f;
+    public float closedDuration = 18f;
+    public float openDuration   = 8f;
     public float phaseOffset    = 0f;
 
     [Header("Animation")]
