@@ -112,24 +112,17 @@ public static class SewerSceneBuilder
     [MenuItem("Sewer/Create Sewer Scene")]
     static void CreateSewerScene()
     {
-        // Материалы — тёмный бетон без normal map
-        var wallMat    = CreateSewerMat("SewerWall",    "Assets/Sewer/Textures/Sewer/concrete_dirty.jpg",  new Color(0.35f, 0.38f, 0.38f), 0.04f);
-        var floorMat   = CreateSewerMat("SewerFloor",   "Assets/Sewer/Textures/Sewer/brick_pavement.jpg",  new Color(0.30f, 0.32f, 0.32f), 0.06f);
-        var ceilingMat = CreateSewerMat("SewerCeiling", "Assets/Sewer/Textures/Sewer/concrete_base_02.jpg",new Color(0.25f, 0.27f, 0.28f), 0.03f);
-        AssetDatabase.SaveAssets();
-
-        // Новая пустая сцена
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        // Освещение — тёмное, холодное
+        // Атмосфера — тёмно, туман
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Exponential;
-        RenderSettings.fogDensity = 0.012f;
-        RenderSettings.fogColor = new Color(0.05f, 0.07f, 0.09f);
+        RenderSettings.fogDensity = 0.015f;
+        RenderSettings.fogColor = new Color(0.04f, 0.06f, 0.08f);
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-        RenderSettings.ambientLight = new Color(0.10f, 0.12f, 0.14f);
+        RenderSettings.ambientLight = new Color(0.08f, 0.10f, 0.12f);
 
-        // Directional Light слабый
+        // Directional Light — слабый, холодный
         var lightGO = new GameObject("Directional Light");
         var light = lightGO.AddComponent<Light>();
         light.type = LightType.Directional;
@@ -138,60 +131,56 @@ public static class SewerSceneBuilder
         light.shadows = LightShadows.None;
         lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-        // Копируем нужные объекты из SampleScene через prefab-подход:
-        // MazeManager GO
-        var mazeManagerGO = new GameObject("MazeManager");
-        var mazeGen     = (MazeGenerator)AddComponentByName(mazeManagerGO, "MazeGenerator");
-        var mazeMgr     = (MazeManager)  AddComponentByName(mazeManagerGO, "MazeManager");
-        AddComponentByName(mazeManagerGO, "AtmosphereSetup");
-        AddComponentByName(mazeManagerGO, "GameManager");
-
-        // Назначаем MazeGenerator → MazeManager
-        if (mazeGen != null && mazeMgr != null)
+        // Сама модель канализации
+        var sewerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Sewer/Models/Sewers.fbx");
+        if (sewerPrefab != null)
         {
-            var soMaze = new SerializedObject(mazeMgr);
-            soMaze.FindProperty("mazeGenerator").objectReferenceValue = mazeGen;
-            soMaze.ApplyModifiedProperties();
+            var sewer = (GameObject)PrefabUtility.InstantiatePrefab(sewerPrefab);
+            sewer.name = "SewerLevel";
+            sewer.transform.position = Vector3.zero;
         }
 
-        // PlayerSpawner GO
-        var spawnerGO = new GameObject("PlayerSpawner");
-        var spawner = (PlayerSpawner)AddComponentByName(spawnerGO, "PlayerSpawner");
-        AddComponentByName(spawnerGO, "PlayerTorch");
-        AddComponentByName(spawnerGO, "MinimapSystem");
+        // Вода
+        var waterMat = BuildWaterMaterial();
+        var waterGO = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        waterGO.name = "SewerWater";
+        waterGO.transform.position = new Vector3(0f, -0.3f, 0f);
+        waterGO.transform.localScale = new Vector3(20f, 1f, 20f);
+        waterGO.GetComponent<Renderer>().sharedMaterial = waterMat;
+        Object.DestroyImmediate(waterGO.GetComponent<Collider>());
+        waterGO.AddComponent<SewerWater>();
 
-        // Назначаем Player prefab → PlayerSpawner
+        // Спавнер игрока — без MazeManager
+        var spawnerGO = new GameObject("SewerSpawner");
+        var sewerSpawner = spawnerGO.AddComponent<SewerPlayerSpawner>();
+        spawnerGO.AddComponent<PlayerTorch>();
+
         var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
             "Assets/StarterAssets/ThirdPersonController/Prefabs/Player_Arissa.prefab");
-        if (spawner != null && playerPrefab != null)
+        if (playerPrefab != null)
         {
-            var soSpawner = new SerializedObject(spawner);
+            var soSpawner = new SerializedObject(sewerSpawner);
             soSpawner.FindProperty("playerPrefab").objectReferenceValue = playerPrefab;
             soSpawner.ApplyModifiedProperties();
         }
 
-        // SewerTheme — только на этой сцене
-        var theme = spawnerGO.AddComponent<SewerTheme>();
-        var soTheme = new SerializedObject(theme);
-        soTheme.FindProperty("wallMaterial").objectReferenceValue    = wallMat;
-        soTheme.FindProperty("floorMaterial").objectReferenceValue   = floorMat;
-        soTheme.FindProperty("ceilingMaterial").objectReferenceValue = ceilingMat;
-        soTheme.ApplyModifiedProperties();
-
-        // Main Camera
+        // Камера
         var camGO = new GameObject("Main Camera");
         camGO.tag = "MainCamera";
         camGO.AddComponent<Camera>();
         camGO.AddComponent<AudioListener>();
         AddComponentByName(camGO, "FollowCamera");
 
-        // Global Volume
-        new GameObject("Global Volume").AddComponent<UnityEngine.Rendering.Volume>();
+        // Post-processing
+        var volGO = new GameObject("Global Volume");
+        volGO.AddComponent<UnityEngine.Rendering.Volume>();
+        AddComponentByName(volGO, "AtmosphereSetup");
 
         const string scenePath = "Assets/Scenes/SewerScene.unity";
+        System.IO.Directory.CreateDirectory("Assets/Scenes");
         EditorSceneManager.SaveScene(scene, scenePath);
         AssetDatabase.Refresh();
-        Debug.Log("[SewerSceneBuilder] SewerScene saved. Open it and press Play to test.");
+        Debug.Log("[SewerSceneBuilder] SewerScene created. Open Assets/Scenes/SewerScene.unity and press Play.");
     }
 
     static Component AddComponentByName(GameObject go, string typeName)

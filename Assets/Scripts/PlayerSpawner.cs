@@ -43,6 +43,8 @@ public class PlayerSpawner : MonoBehaviour
     /// </summary>
     public static event System.Action<GameObject> OnPlayerSpawned;
 
+    public static void FirePlayerSpawned(GameObject player) => OnPlayerSpawned?.Invoke(player);
+
     [Tooltip("Drag your duplicated 'Player' prefab here (StarterAssets > ThirdPersonController > Prefabs > PlayerArmature).")]
     public GameObject playerPrefab;
 
