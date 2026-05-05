@@ -85,17 +85,23 @@ public static class SewerSceneBuilder
         enemyCC.radius = 0.4f;
         enemyCC.center = new Vector3(0, 0.9f, 0);
 
-        // Enemy visual — capsule placeholder
-        var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-        capsule.transform.SetParent(enemyGO.transform, false);
-        capsule.transform.localPosition = new Vector3(0, 0.9f, 0);
-        capsule.transform.localScale    = new Vector3(0.6f, 0.85f, 0.6f);
-        var capMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        capMat.SetColor("_BaseColor", new Color(0.08f, 0.08f, 0.10f));
-        capMat.SetFloat("_Metallic",  0.3f);
-        capMat.SetFloat("_Smoothness",0.2f);
-        capsule.GetComponent<MeshRenderer>().sharedMaterial = capMat;
-        Object.DestroyImmediate(capsule.GetComponent<Collider>());
+        // Enemy visual — Scavenger model
+        var scavengerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Sewer/Models/Scavenger.fbx");
+        if (scavengerPrefab != null)
+        {
+            var mesh = (GameObject)PrefabUtility.InstantiatePrefab(scavengerPrefab, enemyGO.transform);
+            mesh.transform.localPosition = Vector3.zero;
+            mesh.transform.localScale    = Vector3.one * 0.01f; // FBX often imported at 100x scale
+        }
+        else
+        {
+            // Fallback capsule if model not yet imported
+            var capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            capsule.transform.SetParent(enemyGO.transform, false);
+            capsule.transform.localPosition = new Vector3(0, 0.9f, 0);
+            capsule.transform.localScale    = new Vector3(0.6f, 0.85f, 0.6f);
+            Object.DestroyImmediate(capsule.GetComponent<Collider>());
+        }
         // Enemy eyes — two dim red lights
         AddEyeLight(enemyGO.transform, new Vector3( 0.08f, 1.55f, 0.3f));
         AddEyeLight(enemyGO.transform, new Vector3(-0.08f, 1.55f, 0.3f));
