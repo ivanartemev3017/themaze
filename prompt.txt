@@ -1,0 +1,72 @@
+```
+В файле MazeArtifact.cs нужно сделать четыре правки. Перед началом — прочитай файл целиком чтобы найти точные строки.
+
+---
+
+**1. Починить материал (розовый/фиолетовый цвет артефактов)**
+
+В методе Create найди блок создания материала — там где CreatePrimitive(PrimitiveType.Sphere). Замени весь этот блок (от var tempP до globalIlluminationFlags) на:
+
+```csharp
+var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+mat.SetColor("_BaseColor", color * 1.5f);
+mat.EnableKeyword("_EMISSION");
+mat.SetColor("_EmissionColor", color * 1.8f);
+mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+```
+
+---
+
+**2. Починить песочные часы (фиолетовый цвет)**
+
+В методе Create, в блоке if (type == ArtifactType.TimeBonus) — убери строку:
+  ApplyMaterialAllSlots(model, mat);
+Больше ничего в этом блоке не трогай. FBX hourglass должен остаться со своим родным материалом.
+
+---
+
+**3. Внедрить FBX артефакта заморозки**
+
+FBX файл называется ice_cube.fbx и лежит в Assets/Resources/Artifacts/ice_cube.fbx — убедись что файл там есть.
+
+В методе Create найди строку с вызовом BuildProceduralCrystal и замени весь блок else на:
+
+```csharp
+else
+{
+    string modelPath = "Artifacts/ice_cube";
+    var prefab = Resources.Load<GameObject>(modelPath);
+    if (prefab != null)
+    {
+        var model = Object.Instantiate(prefab, visualRoot.transform);
+        model.transform.localPosition = Vector3.zero;
+        model.transform.localScale    = Vector3.one;
+        foreach (var col in model.GetComponentsInChildren<Collider>(true))
+            Object.Destroy(col);
+        AutoScaleModel(model, 0.7f);
+        // НЕ вызывать ApplyMaterialAllSlots — оставить родной материал FBX
+    }
+    else
+    {
+        BuildProceduralCrystal(visualRoot, mat); // fallback если FBX не найден
+    }
+}
+```
+
+---
+
+**4. Джойстик**
+
+В файле MobileControls.cs найди строку:
+  zoneRT.anchorMax = new Vector2(0.5f, 0.7f);
+Замени на:
+  zoneRT.anchorMax = new Vector2(0.5f, 0.42f);
+
+---
+
+ВАЖНО:
+- Не трогать ничего кроме этих четырёх мест
+- Не менять BuildProceduralCrystal и AutoScaleModel — они уже есть в файле и работают
+- Не добавлять ApplyMaterialAllSlots ни к hourglass ни к ice_cube
+- После правок собери проект и проверь что оба артефакта видны в игре без розового/фиолетового цвета
+```

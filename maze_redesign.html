@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE MAZE — Redesign</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --orange: #E8510E;
+    --orange-glow: rgba(232, 81, 14, 0.22);
+    --bg: #080604;
+    --bg2: #110d08;
+    --surface: #181108;
+    --surface2: #221608;
+    --border: rgba(232, 81, 14, 0.18);
+    --text: #f0e8d8;
+    --text-dim: #806050;
+    --green-light: #4caf4c;
+    --yellow-light: #f5c518;
+    --red-light: #e05050;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(232,81,14,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,81,14,0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
+  .bg-vignette {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at center, transparent 20%, #080604 90%);
+    pointer-events: none;
+  }
+
+  /* SCREENS */
+  .screen { display: none; flex-direction: column; width: 100%; max-width: 420px; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* HOME */
+  #home { padding: 0; justify-content: space-between; }
+
+  .home-hero {
+    position: relative; z-index: 1;
+    padding: 58px 28px 28px;
+  }
+  .the-label {
+    font-size: 11px; letter-spacing: 8px; color: var(--text-dim);
+    text-transform: uppercase; font-weight: 500;
+  }
+  .maze-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px; line-height: 0.85;
+    color: var(--orange); letter-spacing: 3px;
+    text-shadow: 0 0 50px rgba(232,81,14,0.55), 0 0 100px rgba(232,81,14,0.2);
+  }
+  .orange-line { width: 56px; height: 2px; background: var(--orange); border-radius: 2px; margin: 14px 0 10px; opacity: 0.7; }
+  .tagline { font-size: 11px; letter-spacing: 4px; color: var(--text-dim); text-transform: uppercase; }
+
+  /* DIFFICULTY */
+  .diff-section { position: relative; z-index: 1; padding: 0 18px; }
+  .section-label {
+    font-size: 10px; letter-spacing: 5px; color: var(--text-dim);
+    text-align: center; margin-bottom: 12px; text-transform: uppercase;
+  }
+  .diff-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  .diff-card {
+    border-radius: 14px; padding: 16px 6px 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    cursor: pointer; border: 2px solid transparent;
+    transition: all 0.18s ease; position: relative; overflow: hidden;
+  }
+  .diff-card.easy   { color: var(--green-light);  background: rgba(76,175,76,0.1); }
+  .diff-card.medium { color: var(--yellow-light); background: rgba(245,197,24,0.08); }
+  .diff-card.hard   { color: var(--red-light);    background: rgba(224,80,80,0.1); }
+
+  .diff-card.selected { border-color: currentColor; }
+  .diff-card.easy.selected   { box-shadow: 0 0 18px rgba(76,175,76,0.3); }
+  .diff-card.medium.selected { box-shadow: 0 0 18px rgba(245,197,24,0.3); }
+  .diff-card.hard.selected   { box-shadow: 0 0 18px rgba(224,80,80,0.3); }
+
+  .diff-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; line-height: 1; }
+  .diff-size { font-size: 11px; color: var(--text-dim); font-weight: 600; }
+  .diff-time { font-size: 13px; font-weight: 700; margin-top: 2px; }
+  .diff-best { font-size: 10px; color: var(--text-dim); margin-top: 4px; letter-spacing: 0.5px; }
+  .diff-best b { color: inherit; opacity: 0.85; }
+
+  /* HOME ACTIONS */
+  .home-actions { position: relative; z-index: 1; padding: 22px 18px 44px; display: flex; flex-direction: column; gap: 10px; }
+
+  .btn-play {
+    width: 100%; padding: 20px;
+    background: var(--orange); border: none; border-radius: 14px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 4px;
+    color: #fff; cursor: pointer;
+    box-shadow: 0 4px 28px rgba(232,81,14,0.45);
+    transition: transform 0.12s, box-shadow 0.12s;
+    position: relative; overflow: hidden;
+  }
+  .btn-play::after {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 55%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.13), transparent);
+    transition: left 0.45s ease;
+  }
+  .btn-play:hover::after { left: 160%; }
+  .btn-play:active { transform: scale(0.97); box-shadow: 0 2px 14px rgba(232,81,14,0.3); }
+
+  .home-nav-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .btn-nav {
+    padding: 17px 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 13px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 14px; letter-spacing: 3px; color: var(--text-dim);
+    cursor: pointer; text-transform: uppercase;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.15s;
+  }
+  .btn-nav:active { background: var(--surface2); color: var(--text); border-color: rgba(232,81,14,0.5); }
+  .btn-nav svg { flex-shrink: 0; }
+
+  /* STORE / RECORDS HEADER */
+  .page-header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center;
+    padding: 54px 18px 18px; gap: 14px;
+  }
+  .btn-back {
+    width: 46px; height: 46px; flex-shrink: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-back:active { background: var(--surface2); border-color: var(--orange); }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 42px;
+    color: var(--orange); letter-spacing: 2px;
+    text-shadow: 0 0 28px rgba(232,81,14,0.45);
+  }
+
+  /* STORE CONTENT */
+  .store-content { position: relative; z-index: 1; padding: 0 18px 44px; display: flex; flex-direction: column; gap: 24px; }
+
+  .store-section-title {
+    font-size: 10px; letter-spacing: 5px; color: var(--text-dim);
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .store-section-title::before, .store-section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* CHAR CARDS */
+  .chars-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .char-card {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 16px; padding: 18px 14px 16px;
+    cursor: pointer; transition: all 0.18s; position: relative; overflow: hidden;
+  }
+  .char-card.selected {
+    border-color: var(--orange); background: rgba(232,81,14,0.08);
+    box-shadow: 0 0 22px rgba(232,81,14,0.2);
+  }
+  .char-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: var(--surface2); margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+  }
+  .char-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; line-height: 1; }
+  .char-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-weight: 500; }
+
+  .badge-selected {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--orange); border-radius: 6px;
+    padding: 3px 8px; font-size: 9px; font-weight: 700;
+    letter-spacing: 1px; color: #fff; text-transform: uppercase;
+  }
+  .badge-tap {
+    position: absolute; top: 12px; right: 12px;
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 3px 8px; font-size: 9px; font-weight: 700;
+    letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase;
+  }
+
+  /* MAP CARDS */
+  .maps-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .map-card {
+    background: var(--surface); border: 2px solid var(--border); border-radius: 16px;
+    padding: 16px 18px; cursor: pointer;
+    display: flex; align-items: center; gap: 14px; transition: all 0.18s;
+  }
+  .map-card.selected {
+    border-color: var(--orange); background: rgba(232,81,14,0.08);
+    box-shadow: 0 0 18px rgba(232,81,14,0.18);
+  }
+  .map-icon {
+    width: 50px; height: 50px; flex-shrink: 0; border-radius: 12px;
+    background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .map-info { flex: 1; }
+  .map-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; line-height: 1; }
+  .map-tags { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-weight: 500; }
+
+  .map-check {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+  }
+  .map-card.selected .map-check { background: var(--orange); border-color: var(--orange); }
+
+  /* RECORDS */
+  .records-content { position: relative; z-index: 1; padding: 0 18px 44px; display: flex; flex-direction: column; gap: 10px; }
+
+  .record-row {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .record-left { display: flex; align-items: center; gap: 12px; }
+  .record-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .record-dot.easy   { background: var(--green-light);  box-shadow: 0 0 8px rgba(76,175,76,0.6); }
+  .record-dot.medium { background: var(--yellow-light); box-shadow: 0 0 8px rgba(245,197,24,0.6); }
+  .record-dot.hard   { background: var(--red-light);    box-shadow: 0 0 8px rgba(224,80,80,0.6); }
+  .record-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; }
+  .record-sub { font-size: 11px; color: var(--text-dim); font-weight: 500; }
+  .record-time { font-size: 24px; font-weight: 700; color: var(--orange); letter-spacing: 1px; }
+
+  /* PARTICLES */
+  .particle {
+    position: fixed; width: 3px; height: 3px; border-radius: 50%;
+    background: var(--orange); pointer-events: none; z-index: 0;
+    animation: particleFly linear infinite;
+  }
+  @keyframes particleFly {
+    0%   { opacity: 0; transform: translateY(0) scale(1); }
+    10%  { opacity: 0.5; }
+    90%  { opacity: 0.15; }
+    100% { opacity: 0; transform: translateY(-100px) scale(0.3); }
+  }
+
+  /* FADE IN */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .screen.active > * { animation: fadeUp 0.3s ease both; }
+  .screen.active > *:nth-child(2) { animation-delay: 0.06s; }
+  .screen.active > *:nth-child(3) { animation-delay: 0.12s; }
+  .screen.active > *:nth-child(4) { animation-delay: 0.18s; }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-vignette"></div>
+
+<!-- ========== HOME ========== -->
+<div class="screen active" id="home">
+
+  <div class="home-hero">
+    <div class="the-label">THE</div>
+    <div class="maze-title">MAZE</div>
+    <div class="orange-line"></div>
+    <div class="tagline">Escape before the walls close in</div>
+  </div>
+
+  <div class="diff-section">
+    <div class="section-label">— Select Difficulty —</div>
+    <div class="diff-row">
+      <div class="diff-card easy" onclick="selectDiff(this)">
+        <div class="diff-name">Easy</div>
+        <div class="diff-size">15 × 15</div>
+        <div class="diff-time">4:00</div>
+        <div class="diff-best">Best <b>01:03</b></div>
+      </div>
+      <div class="diff-card medium selected" onclick="selectDiff(this)">
+        <div class="diff-name">Med</div>
+        <div class="diff-size">20 × 20</div>
+        <div class="diff-time">3:00</div>
+        <div class="diff-best">Best <b>01:54</b></div>
+      </div>
+      <div class="diff-card hard" onclick="selectDiff(this)">
+        <div class="diff-name">Hard</div>
+        <div class="diff-size">25 × 25</div>
+        <div class="diff-time">2:30</div>
+        <div class="diff-best">Best <b>02:20</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-actions">
+    <button class="btn-play">PLAY</button>
+    <div class="home-nav-row">
+      <button class="btn-nav" onclick="showScreen('store')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Store
+      </button>
+      <button class="btn-nav" onclick="showScreen('records')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Records
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== STORE ========== -->
+<div class="screen" id="store">
+
+  <div class="page-header">
+    <div class="btn-back" onclick="showScreen('home')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8510E" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="page-title">STORE</div>
+  </div>
+
+  <div class="store-content">
+
+    <div>
+      <div class="store-section-title">Characters</div>
+      <div class="chars-row">
+
+        <div class="char-card" onclick="selectChar(this)">
+          <div class="badge-tap">Tap</div>
+          <div class="char-avatar">🗡️</div>
+          <div class="char-name">ARISSA</div>
+          <div class="char-sub">Shadow Blade</div>
+        </div>
+
+        <div class="char-card selected" onclick="selectChar(this)">
+          <div class="badge-selected">Active</div>
+          <div class="char-avatar">🏃</div>
+          <div class="char-name">EVE</div>
+          <div class="char-sub">Maze Runner</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div>
+      <div class="store-section-title">Maps</div>
+      <div class="maps-list">
+
+        <div class="map-card selected" onclick="selectMap(this)">
+          <div class="map-icon">🏰</div>
+          <div class="map-info">
+            <div class="map-name">DUNGEON</div>
+            <div class="map-tags">Dark · Stone</div>
+          </div>
+          <div class="map-check">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+
+        <div class="map-card" onclick="selectMap(this)">
+          <div class="map-icon">🏜️</div>
+          <div class="map-info">
+            <div class="map-name">DESERT</div>
+            <div class="map-tags">Sand · Heat</div>
+          </div>
+          <div class="map-check">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== RECORDS ========== -->
+<div class="screen" id="records">
+
+  <div class="page-header">
+    <div class="btn-back" onclick="showScreen('home')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8510E" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="page-title">RECORDS</div>
+  </div>
+
+  <div class="records-content">
+    <div class="section-label" style="text-align:left; margin-bottom: 6px;">Best Times · Dungeon</div>
+
+    <div class="record-row">
+      <div class="record-left">
+        <div class="record-dot easy"></div>
+        <div>
+          <div class="record-name">EASY</div>
+          <div class="record-sub">15 × 15 · 4:00 limit</div>
+        </div>
+      </div>
+      <div class="record-time">01:03</div>
+    </div>
+
+    <div class="record-row">
+      <div class="record-left">
+        <div class="record-dot medium"></div>
+        <div>
+          <div class="record-name">MEDIUM</div>
+          <div class="record-sub">20 × 20 · 3:00 limit</div>
+        </div>
+      </div>
+      <div class="record-time">01:54</div>
+    </div>
+
+    <div class="record-row">
+      <div class="record-left">
+        <div class="record-dot hard"></div>
+        <div>
+          <div class="record-name">HARD</div>
+          <div class="record-sub">25 × 25 · 2:30 limit</div>
+        </div>
+      </div>
+      <div class="record-time">02:20</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Floating particles
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      top: ${50 + Math.random() * 50}vh;
+      animation-duration: ${4 + Math.random() * 7}s;
+      animation-delay: ${Math.random() * 8}s;
+    `;
+    document.body.appendChild(p);
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function selectDiff(el) {
+    document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function selectChar(el) {
+    document.querySelectorAll('.char-card').forEach(c => {
+      c.classList.remove('selected');
+      c.querySelectorAll('.badge-selected').forEach(b => b.remove());
+      if (!c.querySelector('.badge-tap')) {
+        const b = document.createElement('div');
+        b.className = 'badge-tap'; b.textContent = 'Tap';
+        c.appendChild(b);
+      }
+    });
+    el.classList.add('selected');
+    const tb = el.querySelector('.badge-tap');
+    if (tb) tb.remove();
+    const sb = document.createElement('div');
+    sb.className = 'badge-selected'; sb.textContent = 'Active';
+    el.appendChild(sb);
+  }
+
+  function selectMap(el) {
+    document.querySelectorAll('.map-card').forEach(c => {
+      c.classList.remove('selected');
+      c.querySelector('.map-check svg').setAttribute('stroke','rgba(255,255,255,0.15)');
+    });
+    el.classList.add('selected');
+    el.querySelector('.map-check svg').setAttribute('stroke','#fff');
+  }
+</script>
+</body>
+</html>
