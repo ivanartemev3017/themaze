@@ -13,6 +13,19 @@
 # Claude Code
 .claude/
 
+# Sewer — сырые исходники до импорта в Unity
+/Sewer/
+
+# Root-level dev/planning files — не нужны в репо
+CLAUDE.md
+CONTEXT.md
+PLAN.md
+THEME_PLAN.md
+prompt.txt
+
+# Loose FBX в корне — не Unity ассеты
+/*.fbx
+
 # Unity3D generated meta files
 *.pidb.meta
 *.pdb.meta
