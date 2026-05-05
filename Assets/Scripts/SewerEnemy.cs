@@ -8,7 +8,7 @@ using UnityEngine;
 public class SewerEnemy : MonoBehaviour
 {
     [Header("Detection")]
-    public float hearingRadius     = 10f;
+    public float hearingRadius     = 25f;
     public float noiseThreshold    = 0.4f;  // player CharacterController velocity magnitude
     public float loseSoundDelay    = 3.5f;  // seconds of silence before returning to patrol
 
@@ -50,6 +50,16 @@ public class SewerEnemy : MonoBehaviour
     {
         _player   = p.transform;
         _playerCC = p.GetComponent<CharacterController>();
+
+        // Teleport to a random cell now that the maze exists
+        if (maze != null)
+        {
+            var pos = maze.GetRandomCellCenter() + Vector3.up * 0.5f;
+            _cc.enabled = false;
+            transform.position = pos;
+            _cc.enabled = true;
+        }
+        PickPatrolTarget();
     }
 
     // ── Update ────────────────────────────────────────────────────────────────

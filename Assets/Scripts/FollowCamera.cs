@@ -20,22 +20,22 @@ public class FollowCamera : MonoBehaviour
     public static FollowCamera Instance { get; private set; }
 
     // ---- tunables -------------------------------------------------------
-    private const float DefaultDistance  = 3.5f;   // fits in 4-unit corridors
-    private const float MinDistance      = 1.5f;   // never clips into player
-    private const float HeightOffset     = 3.8f;   // higher = fewer wall collisions
-    private const float SphereRadius     = 0.20f;  // less aggressive detection
-    private const float DefaultPitch     = 28f;    // slight overhead angle
-    private const float SnapInSpeed      = 9f;     // pull toward wall — visible but not jarring
-    private const float SnapOutSpeed     = 6f;     // drift back — balanced with snap-in
-    private const float AutoFollowSpeed  = 2.5f;   // yaw auto-follow — slow to avoid feedback loop
-    private const float AutoFollowDelay  = 0.8f;   // seconds of no touch before auto-follow
-    private const float AutoFollowMinSpd = 0.3f;   // min player speed to trigger auto-follow
+    public float defaultDistance  = 3.5f;
+    public float heightOffset     = 3.8f;
+    public float defaultPitch     = 28f;
+    private const float MinDistance      = 1.5f;
+    private const float SphereRadius     = 0.20f;
+    private const float SnapInSpeed      = 9f;
+    private const float SnapOutSpeed     = 6f;
+    private const float AutoFollowSpeed  = 2.5f;
+    private const float AutoFollowDelay  = 0.8f;
+    private const float AutoFollowMinSpd = 0.3f;
     // ---------------------------------------------------------------------
 
     private Transform           _target;
     private float               _yaw;
-    private float               _pitch = DefaultPitch;
-    private float               _currentDistance = DefaultDistance;
+    private float               _pitch;
+    private float               _currentDistance;
     private CharacterController _cc;
     private float               _lastInputTime;
 
@@ -54,7 +54,22 @@ public class FollowCamera : MonoBehaviour
     public bool IsFirstPerson => _firstPerson;
 
     // =========================================================================
-    void Awake() { if (Instance == null) Instance = this; }
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        _currentDistance = defaultDistance;
+        _pitch           = defaultPitch;
+    }
+
+    /// <summary>Override camera tuning for a specific level (e.g. sewer tight corridors).</summary>
+    public void SetCameraSettings(float newHeightOffset, float newDistance, float newPitch)
+    {
+        heightOffset     = newHeightOffset;
+        defaultDistance  = newDistance;
+        defaultPitch     = newPitch;
+        _currentDistance = newDistance;
+        _pitch           = newPitch;
+    }
 
     void OnEnable()  => PlayerSpawner.OnPlayerSpawned += OnPlayerSpawned;
     void OnDisable() => PlayerSpawner.OnPlayerSpawned -= OnPlayerSpawned;
@@ -149,17 +164,17 @@ public class FollowCamera : MonoBehaviour
         }
 
         Quaternion rotation = Quaternion.Euler(_pitch, _yaw, 0f);
-        Vector3    pivot    = _target.position + Vector3.up * HeightOffset;
+        Vector3    pivot    = _target.position + Vector3.up * heightOffset;
         Vector3    backDir  = rotation * Vector3.back;
 
         // --- 2. SphereCast: detect walls ------------------------------------
         bool wallHit = Physics.SphereCast(
-            pivot, SphereRadius, backDir, out RaycastHit hit, DefaultDistance,
+            pivot, SphereRadius, backDir, out RaycastHit hit, defaultDistance,
             Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
 
         float targetDist = wallHit
             ? Mathf.Max(MinDistance, hit.distance - SphereRadius)
-            : DefaultDistance;
+            : defaultDistance;
 
         // Balanced lerp: fast snap in, moderately fast drift out.
         // Similar speeds prevent the oscillation where camera bounces

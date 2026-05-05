@@ -28,7 +28,15 @@ public class SewerLevelManager : MonoBehaviour
 
     void OnDestroy() { if (Instance == this) Instance = null; }
 
-    void Start() => PlayerSpawner.OnPlayerSpawned += _ => BuildHUD();
+    void Start() => PlayerSpawner.OnPlayerSpawned += _ =>
+    {
+        BuildHUD();
+        // Tight sewer corridors need lower camera pivot and shorter pull distance
+        FollowCamera.Instance?.SetCameraSettings(
+            newHeightOffset: 0.4f,
+            newDistance:     2.2f,
+            newPitch:        15f);
+    };
 
     // ── Update ────────────────────────────────────────────────────────────────
 

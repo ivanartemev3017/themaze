@@ -62,7 +62,15 @@ public class MinimapSystem : MonoBehaviour
             _player = player.transform;
 
             var mgr = FindAnyObjectByType<MazeManager>();
-            if (mgr != null) _exitPos = mgr.ExitPosition;
+            if (mgr != null)
+            {
+                _exitPos = mgr.ExitPosition;
+            }
+            else
+            {
+                var sewerGen = FindAnyObjectByType<SewerMazeGenerator>();
+                if (sewerGen != null) _exitPos = sewerGen.ExitWorldPosition;
+            }
 
             // Player direction arrow at Y=55 (above walls, seen only by minimap camera).
             // Flat mesh in XZ plane, parented to player so it rotates with them.
