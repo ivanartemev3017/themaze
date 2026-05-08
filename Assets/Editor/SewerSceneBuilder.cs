@@ -22,9 +22,9 @@ public static class SewerSceneBuilder
         System.IO.Directory.CreateDirectory("Assets/Scenes");
 
         // Materials
-        var wallMat    = MakeMat("SewerWall",    TEX_WALL,    new Color(0.32f, 0.34f, 0.34f), 0.04f);
-        var floorMat   = MakeMat("SewerFloor",   TEX_FLOOR,   new Color(0.28f, 0.30f, 0.30f), 0.06f);
-        var ceilMat    = MakeMat("SewerCeiling", TEX_CEILING, new Color(0.20f, 0.22f, 0.23f), 0.03f);
+        var wallMat    = MakeMat("SewerWall",    TEX_WALL,    new Color(0.18f, 0.19f, 0.19f), 0.03f);
+        var floorMat   = MakeMat("SewerFloor",   TEX_FLOOR,   new Color(0.15f, 0.16f, 0.16f), 0.05f);
+        var ceilMat    = MakeMat("SewerCeiling", TEX_CEILING, new Color(0.12f, 0.13f, 0.14f), 0.02f);
         var waterMat   = MakeWaterMat();
         var gateMat    = MakeGateMat();
         AssetDatabase.SaveAssets();
@@ -32,13 +32,13 @@ public static class SewerSceneBuilder
         // New scene
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
-        // Environment
+        // Environment — dark sewer atmosphere
         RenderSettings.fog         = true;
         RenderSettings.fogMode     = FogMode.Exponential;
-        RenderSettings.fogDensity  = 0.018f;
-        RenderSettings.fogColor    = new Color(0.03f, 0.05f, 0.06f);
+        RenderSettings.fogDensity  = 0.032f;   // thick damp air, ~15m visibility
+        RenderSettings.fogColor    = new Color(0.02f, 0.03f, 0.04f);
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-        RenderSettings.ambientLight= new Color(0.07f, 0.09f, 0.10f);
+        RenderSettings.ambientLight= new Color(0.04f, 0.05f, 0.06f);  // near-black ambient
 
         // Faint directional light (nearly everything lit by point lights)
         var dLight = new GameObject("Directional Light").AddComponent<Light>();
@@ -57,6 +57,11 @@ public static class SewerSceneBuilder
         var mazeGen = mazeGO.AddComponent<SewerMazeGenerator>();
 
         var soMaze = new SerializedObject(mazeGen);
+        soMaze.FindProperty("mazeWidth").intValue                   = 7;
+        soMaze.FindProperty("mazeHeight").intValue                  = 7;
+        soMaze.FindProperty("cellSize").floatValue                  = 6f;
+        soMaze.FindProperty("wallHeight").floatValue                = 2.5f;
+        soMaze.FindProperty("wallThick").floatValue                 = 0.5f;
         soMaze.FindProperty("wallMaterial").objectReferenceValue    = wallMat;
         soMaze.FindProperty("floorMaterial").objectReferenceValue   = floorMat;
         soMaze.FindProperty("ceilingMaterial").objectReferenceValue = ceilMat;
@@ -141,7 +146,7 @@ public static class SewerSceneBuilder
         mat.SetColor("_BaseColor", tint);
         mat.SetFloat("_Smoothness", smooth);
         mat.SetFloat("_Metallic",   0f);
-        mat.SetTextureScale("_BaseMap", new Vector2(3f, 3f));
+        mat.SetTextureScale("_BaseMap", new Vector2(2f, 2f));
 
         var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
         if (tex != null) mat.SetTexture("_BaseMap", tex);

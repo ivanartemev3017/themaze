@@ -4,11 +4,11 @@ using UnityEngine;
 public class SewerMazeGenerator : MonoBehaviour
 {
     [Header("Layout")]
-    public int   mazeWidth  = 9;
-    public int   mazeHeight = 9;
-    public float cellSize   = 4f;
-    public float wallHeight = 1.0f;   // straight wall section before arch starts
-    public float wallThick  = 0.35f;
+    public int   mazeWidth  = 7;
+    public int   mazeHeight = 7;
+    public float cellSize   = 6f;
+    public float wallHeight = 2.5f;   // straight wall section before arch starts
+    public float wallThick  = 0.5f;
 
     [Header("Materials")]
     public Material wallMaterial;
@@ -125,10 +125,11 @@ public class SewerMazeGenerator : MonoBehaviour
     void BuildGeometry()
     {
         float totalH = TotalHeight;
+        float tileW  = cellSize + wallThick;
 
-        // One arch cap mesh shared by all walls (double-sided filled arch polygon)
-        var capMesh   = ArchCapMesh(cellSize + wallThick, wallHeight, ArchRadius);
-        var floorMesh = BoxMesh(new Vector3(cellSize + wallThick, 0.25f, cellSize + wallThick));
+        var capMesh   = ArchCapMesh(tileW, wallHeight, ArchRadius);
+        var floorMesh = BoxMesh(new Vector3(tileW, 0.25f, tileW));
+        var ceilMesh  = BoxMesh(new Vector3(tileW, 0.25f, tileW));
 
         for (int x = 0; x < mazeWidth; x++)
         for (int z = 0; z < mazeHeight; z++)
@@ -137,8 +138,12 @@ public class SewerMazeGenerator : MonoBehaviour
             float cx = origin.x + cellSize * 0.5f;
             float cz = origin.z + cellSize * 0.5f;
 
-            // Floor (sewer water)
+            // Floor (sewer water channel)
             SpawnMesh(new Vector3(cx, 0.02f, cz), Vector3.one, floorMesh, waterMaterial, "Floor");
+
+            // Ceiling — closes the top of the arch so there is no open void above
+            var ceilMat = ceilingMaterial != null ? ceilingMaterial : wallMaterial;
+            SpawnMesh(new Vector3(cx, totalH + 0.12f, cz), Vector3.one, ceilMesh, ceilMat, "Ceiling");
 
             // South arch wall
             if (HWalls[x, z])
@@ -264,18 +269,19 @@ public class SewerMazeGenerator : MonoBehaviour
 
     void PlaceLights()
     {
-        float lightY = TotalHeight - 0.3f;
+        float lightY = wallHeight * 0.85f;
 
         for (int x = 0; x < mazeWidth;  x++)
         for (int z = 0; z < mazeHeight; z++)
         {
-            int p = 0;
-            if (x > 0            && !VWalls[x,   z  ]) p++;
-            if (x < mazeWidth-1  && !VWalls[x+1, z  ]) p++;
-            if (z > 0            && !HWalls[x,   z  ]) p++;
-            if (z < mazeHeight-1 && !HWalls[x,   z+1]) p++;
+            int passages = 0;
+            if (x > 0            && !VWalls[x,   z  ]) passages++;
+            if (x < mazeWidth-1  && !VWalls[x+1, z  ]) passages++;
+            if (z > 0            && !HWalls[x,   z  ]) passages++;
+            if (z < mazeHeight-1 && !HWalls[x,   z+1]) passages++;
 
-            if (p < 3 && Random.value > 0.25f) continue;
+            // Sparse: only at intersections (3+ exits) always, elsewhere 30% chance
+            if (passages < 3 && Random.value > 0.30f) continue;
 
             var lg = new GameObject("Light");
             lg.transform.SetParent(_root.transform);
@@ -283,9 +289,9 @@ public class SewerMazeGenerator : MonoBehaviour
 
             var l = lg.AddComponent<Light>();
             l.type      = LightType.Point;
-            l.color     = new Color(0.28f, 0.65f, 0.38f);
-            l.intensity = 3f;
-            l.range     = 9f;
+            l.color     = new Color(0.95f, 0.62f, 0.20f);  // amber torch
+            l.intensity = 2.2f;
+            l.range     = cellSize * 2.2f;
             l.shadows   = LightShadows.None;
         }
     }
