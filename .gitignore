@@ -61,3 +61,8 @@ desktop.ini
 # Keystore — НЕ коммитить в публичное репо!
 *.keystore
 *.jks
+
+# Unity autosave recovery + local logs
+Assets/_Recovery/
+Assets/_Recovery.meta
+logs.txt
