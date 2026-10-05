@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f110f8d9c17b3e446a708abbbff2938f, type: 3}
+  m_Name: AssetBank
+  m_EditorClassIdentifier: Assembly-CSharp::MazeRunner.AssetBank
+  Themes:
+  - Id: stone
+    WallSide: {fileID: 2100000, guid: d0c19e2df11f31c4db22a763ac98682c, type: 2}
+    WallTop: {fileID: 2100000, guid: 56f5eaeede559f54480806455acf1984, type: 2}
+    Floor: {fileID: 2100000, guid: 785c7caa9364c5041b4eb75f226891d7, type: 2}
+    Ground: {fileID: 2100000, guid: 256a7faba83a31345b5174a89143ba87, type: 2}
+    Ambient: {r: 0.16, g: 0.18, b: 0.22, a: 1}
+    Moon: {r: 0.55, g: 0.65, b: 0.95, a: 1}
+    MoonIntensity: 0.6
+    Torch: {r: 1, g: 0.64, b: 0.32, a: 1}
+    Exit: {r: 0.4, g: 1, b: 0.75, a: 1}
+    Accent: {r: 0.95, g: 0.75, b: 0.35, a: 1}
+    EnemyTint: {r: 0.06, g: 0.05, b: 0.05, a: 1}
+    Background: {r: 0.02, g: 0.025, b: 0.03, a: 1}
+  - Id: sewer
+    WallSide: {fileID: 2100000, guid: 8144161ebc8f85a46968faf0cfb5a645, type: 2}
+    WallTop: {fileID: 2100000, guid: e710f789cda9823469a8794b68255c28, type: 2}
+    Floor: {fileID: 2100000, guid: 4bc0597d9af55ed4b800caa46f03bb81, type: 2}
+    Ground: {fileID: 2100000, guid: ca27df0424695054ba8ec7c0dca3564f, type: 2}
+    Ambient: {r: 0.12, g: 0.18, b: 0.15, a: 1}
+    Moon: {r: 0.45, g: 0.85, b: 0.65, a: 1}
+    MoonIntensity: 0.55
+    Torch: {r: 1, g: 0.72, b: 0.4, a: 1}
+    Exit: {r: 0.55, g: 0.85, b: 1, a: 1}
+    Accent: {r: 0.95, g: 0.75, b: 0.35, a: 1}
+    EnemyTint: {r: 0.12, g: 0.16, b: 0.08, a: 1}
+    Background: {r: 0.015, g: 0.03, b: 0.025, a: 1}
+  - Id: sands
+    WallSide: {fileID: 2100000, guid: f883d4ab7ab7f644eabdc4396a2a1605, type: 2}
+    WallTop: {fileID: 2100000, guid: b9636ef0e9bcf9441bb4313a2c4b6ed8, type: 2}
+    Floor: {fileID: 2100000, guid: 811ea4847ac4fe443be68df177ef8fb0, type: 2}
+    Ground: {fileID: 2100000, guid: 51cf7d0ae0baec64b819f3dead43f444, type: 2}
+    Ambient: {r: 0.22, g: 0.16, b: 0.13, a: 1}
+    Moon: {r: 0.65, g: 0.6, b: 0.95, a: 1}
+    MoonIntensity: 0.6
+    Torch: {r: 1, g: 0.6, b: 0.28, a: 1}
+    Exit: {r: 0.45, g: 1, b: 0.9, a: 1}
+    Accent: {r: 0.95, g: 0.75, b: 0.35, a: 1}
+    EnemyTint: {r: 0.45, g: 0.3, b: 0.16, a: 1}
+    Background: {r: 0.04, g: 0.03, b: 0.03, a: 1}
+  Player: {fileID: 4416926081852918481, guid: d69c00d62eefa8d4b8447c23a2938aa9, type: 3}
+  Spider: {fileID: 1705849404070370923, guid: f6a8b0c2d4e6f8a0b2c4d6e8f0a2b4c6, type: 3}
+  SpiderWalk: {fileID: 7400000, guid: a7b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7, type: 2}
+  SpiderIdle: {fileID: 7400000, guid: b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8, type: 2}
+  EnemyMat: {fileID: 2100000, guid: b52e4e47a7d061a42b01915cdc293101, type: 2}
+  Hourglass: {fileID: 919132149155446097, guid: 15aa0e90a725e9e47a8f0741aa5aa875, type: 3}
+  Crystal: {fileID: 919132149155446097, guid: 0dab79f0e43aaae4592f1aaec6dcbf46, type: 3}
+  ShardMat: {fileID: 2100000, guid: 69a9ea1be439b3346b42bbf286ab9ad9, type: 2}
+  KeyMat: {fileID: 2100000, guid: 99d46e2c44983a048b4930d27f8c863a, type: 2}
+  HourglassMat: {fileID: 2100000, guid: 38e4c26e7802b0449b35866ae4c2aad7, type: 2}
+  CrystalMat: {fileID: 2100000, guid: 84faa1b44db76b9418469428214c81eb, type: 2}
+  GateMat: {fileID: 2100000, guid: 6328f0c9591ea5c43b761f00120ddb27, type: 2}
+  Glow: {fileID: 2100000, guid: 4c6e9afa0cc8d134c9a5f6ce631a3359, type: 2}
+  Profile: {fileID: 11400000, guid: fe0d6396fe10df140ba351377544697f, type: 2}
+  Ambience: {fileID: 8300000, guid: b3bf537746adeea4d8022dfa14a36e18, type: 3}
+  Shift: {fileID: 8300000, guid: e98c5f6f114afe440bc4ee28a71223c5, type: 3}
+  Growl: {fileID: 8300000, guid: 7c5a626fd01bb4b46a58652ccd572cef, type: 3}
+  Tick: {fileID: 8300000, guid: 34373ad058952b6448ff1495067cbf55, type: 3}
+  Font: {fileID: 11400000, guid: 7733f5c7b920cda4daad6df479b5becc, type: 2}
+  TitleFont: {fileID: 11400000, guid: 2ce591963160a1245a27f732a67638b0, type: 2}
