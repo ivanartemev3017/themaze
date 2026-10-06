@@ -290,7 +290,8 @@ namespace MazeRunner.EditorTools
             PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
             PlayerSettings.bundleVersion = "1.0.0";
-            if (PlayerSettings.Android.bundleVersionCode < 18) PlayerSettings.Android.bundleVersionCode = 18;
+            // Google Play already has versionCode 20 (v0.2.1); every upload must be higher.
+            if (PlayerSettings.Android.bundleVersionCode < 21) PlayerSettings.Android.bundleVersionCode = 21;
 
             const string iconPath = Root + "/Art/Icon.png";
             var imp = (TextureImporter)AssetImporter.GetAtPath(iconPath);
