@@ -286,6 +286,9 @@ namespace MazeRunner.EditorTools
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
             PlayerSettings.SplashScreen.showUnityLogo = false;
             PlayerSettings.productName = "The Maze";
+            // 32-bit too: many budget phones run 32-bit Android and reject arm64-only packages as "invalid".
+            PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
             PlayerSettings.bundleVersion = "1.0.0";
             if (PlayerSettings.Android.bundleVersionCode < 18) PlayerSettings.Android.bundleVersionCode = 18;
 
