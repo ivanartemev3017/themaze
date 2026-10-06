@@ -64,11 +64,15 @@ namespace MazeRunner.Dev
                     case "levels": App.I.ShowLevels(int.Parse(a[1])); yield return Frames(3); break;
                     case "play": App.I.Play(LevelConfig.For(int.Parse(a[1]), int.Parse(a[2]))); yield return Frames(2); Attach(); break;
                     case "daily": App.I.Play(LevelConfig.Daily(System.DateTime.Now)); yield return Frames(2); break;
-                    case "wait": yield return new WaitForSeconds(float.Parse(a[1], System.Globalization.CultureInfo.InvariantCulture)); break;
+                    case "wait": yield return new WaitForSecondsRealtime(float.Parse(a[1], System.Globalization.CultureInfo.InvariantCulture)); break;
                     case "shot": Shot(a[1]); break;
                     case "bot": yield return Bot(a.Length > 1 ? float.Parse(a[1]) : 240f); break;
                     case "botall": yield return BotAll(int.Parse(a[1]), int.Parse(a[2]), int.Parse(a[3])); break;
                     case "unlock": Save.FullUnlocked = true; break;
+                    case "pause": App.I.ShowPause(); yield return Frames(2); break;
+                    case "unlockui": App.I.ShowUnlock(); yield return Frames(2); break;
+                    case "settings": App.I.ShowSettings(); yield return Frames(2); break;
+                    case "timescale": Time.timeScale = float.Parse(a[1], System.Globalization.CultureInfo.InvariantCulture); break;
                     case "quit": Quit(); yield break;
                 }
             }

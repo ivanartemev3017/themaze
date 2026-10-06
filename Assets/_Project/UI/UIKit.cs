@@ -44,12 +44,27 @@ namespace MazeRunner
 
         static float StarShape(float x, float y)
         {
-            float a = Mathf.Atan2(x, y);
-            float r = Mathf.Sqrt(x * x + y * y);
-            float seg = Mathf.PI * 2f / 5f;
-            float k = Mathf.Abs(Mathf.Repeat(a + seg * 0.5f, seg) - seg * 0.5f) / (seg * 0.5f);
-            float rad = Mathf.Lerp(0.95f, 0.42f, k);
-            return Edge(rad - r);
+            // Union of five convex kites (centre, inner, outer tip, inner) — crisp straight-edged star.
+            const float outer = 0.97f, inner = 0.4f;
+            float best = -1f;
+            for (int i = 0; i < 5; i++)
+            {
+                float a0 = Mathf.PI * 0.5f + i * Mathf.PI * 0.4f;
+                var tip = new Vector2(Mathf.Cos(a0), Mathf.Sin(a0)) * outer;
+                var l = new Vector2(Mathf.Cos(a0 + Mathf.PI * 0.2f), Mathf.Sin(a0 + Mathf.PI * 0.2f)) * inner;
+                var r = new Vector2(Mathf.Cos(a0 - Mathf.PI * 0.2f), Mathf.Sin(a0 - Mathf.PI * 0.2f)) * inner;
+                var p = new Vector2(x, y);
+                float d = Mathf.Min(Mathf.Min(EdgeDist(Vector2.zero, r, p), EdgeDist(r, tip, p)), Mathf.Min(EdgeDist(tip, l, p), EdgeDist(l, Vector2.zero, p)));
+                best = Mathf.Max(best, d);
+            }
+            return Edge(best);
+        }
+
+        // Signed distance to edge a→b; positive on the left (counter-clockwise interior).
+        static float EdgeDist(Vector2 a, Vector2 b, Vector2 p)
+        {
+            var e = b - a;
+            return (e.x * (p.y - a.y) - e.y * (p.x - a.x)) / e.magnitude;
         }
 
         static float ArrowShape(float x, float y)

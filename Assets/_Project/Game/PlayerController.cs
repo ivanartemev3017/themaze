@@ -67,6 +67,18 @@ namespace MazeRunner
             torch.shadows = LightShadows.None;
             torch.gameObject.AddComponent<TorchFlicker>();
 
+            // Warm ring under the feet: the player stays readable on any floor.
+            var ring = new GameObject("Ring");
+            ring.transform.SetParent(go.transform, false);
+            ring.transform.localPosition = Vector3.up * 0.06f;
+            ring.AddComponent<MeshFilter>().sharedMesh = MeshKit.FlatQuad(2.4f, 2.4f);
+            var rr = ring.AddComponent<MeshRenderer>();
+            var rm = new Material(AssetBank.I.Glow);
+            rm.SetFloat("_Shape", 0);
+            rm.SetColor("_Color", new Color(theme.Torch.r, theme.Torch.g, theme.Torch.b, 0.7f));
+            rr.sharedMaterial = rm;
+            rr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
             go.SetActive(true);
             return pc;
         }

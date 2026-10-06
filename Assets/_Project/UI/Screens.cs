@@ -94,7 +94,7 @@ namespace MazeRunner
                 bool sel = c == chapter;
                 var tab = Button(root, "", () => App.ShowLevels(cc), sel ? Style.Primary : Style.Secondary);
                 tab.GetComponent<RectTransform>().Place(new Vector2(0.5f, 1), new Vector2(470, 120), new Vector2((c - 1) * 500, -50), new Vector2(0.5f, 1));
-                var name = Text(tab.transform, Loc.Get("ch" + c), 38, sel ? AmberDark : Ink, title: true);
+                var name = Text(tab.transform, Loc.Get("ch" + c), 34, sel ? AmberDark : Ink, title: true);
                 name.rectTransform.Place(new Vector2(0.5f, 1), new Vector2(460, 60), new Vector2(0, -12), new Vector2(0.5f, 1));
                 bool open = Save.ChapterOpen(c);
                 var infoColor = sel ? new Color(0.16f, 0.09f, 0.02f, 0.75f) : Muted;
@@ -111,7 +111,7 @@ namespace MazeRunner
             bool chapterOpen = Save.ChapterOpen(chapter);
             int next = Save.NextLevel(chapter);
             const int cols = 10;
-            for (int i = 0; i < LevelConfig.LevelsPerChapter; i++)
+            for (int i = 0; i < LevelConfig.LevelsPerChapter && chapterOpen; i++)
             {
                 int lv = i;
                 int col = i % cols, row = i / cols;
@@ -143,8 +143,8 @@ namespace MazeRunner
 
             if (!chapterOpen)
             {
-                var cover = Panel(root, "Cover", new Color(0.03f, 0.03f, 0.04f, 0.9f));
-                cover.rectTransform.Place(Mid, new Vector2(1000, 520), new Vector2(0, -70));
+                var cover = Panel(root, "Cover", new Color(0.03f, 0.03f, 0.04f, 0.94f));
+                cover.rectTransform.Place(Mid, new Vector2(1100, 560), new Vector2(0, -70));
                 var l = Image(cover.transform, "Lock", Lock, Amber);
                 l.rectTransform.Place(new Vector2(0.5f, 1), new Vector2(110, 110), new Vector2(0, -50), new Vector2(0.5f, 1));
                 var t = Text(cover.transform, Loc.Get("unlock_body"), 38, Ink);
@@ -231,7 +231,7 @@ namespace MazeRunner
 
         public static void Unlock(RectTransform overlay)
         {
-            var card = Card(overlay, new Vector2(1000, 720));
+            var card = Card(overlay, new Vector2(1000, 820));
             Heading(card, Loc.Get("unlock_title"), Amber);
             for (int c = 1; c < LevelConfig.ChapterCount; c++)
             {
@@ -241,9 +241,9 @@ namespace MazeRunner
                 ct.rectTransform.Fill();
             }
             var body = Text(card, Loc.Get("unlock_body"), 38, Ink);
-            body.rectTransform.Place(new Vector2(0.5f, 1), new Vector2(860, 160), new Vector2(0, -310), new Vector2(0.5f, 1));
+            body.rectTransform.Place(new Vector2(0.5f, 1), new Vector2(860, 140), new Vector2(0, -300), new Vector2(0.5f, 1));
             var buy = Button(card, UnlockLabel(), () => Store.I?.Buy(), Style.Primary, 50);
-            buy.GetComponent<RectTransform>().Place(new Vector2(0.5f, 0), new Vector2(640, 130), new Vector2(0, 150), new Vector2(0.5f, 0));
+            buy.GetComponent<RectTransform>().Place(new Vector2(0.5f, 0), new Vector2(640, 130), new Vector2(0, 160), new Vector2(0.5f, 0));
             var close = Button(card, Loc.Get("back"), App.CloseOverlay, Style.Ghost, 38);
             close.GetComponent<RectTransform>().Place(new Vector2(0.5f, 0), new Vector2(400, 100), new Vector2(0, 40), new Vector2(0.5f, 0));
         }
@@ -290,9 +290,9 @@ namespace MazeRunner
                 tl.rectTransform.Place(new Vector2(0.5f, 1), new Vector2(800, 60), new Vector2(0, -570), new Vector2(0.5f, 1));
 
                 var next = Button(card, Loc.Get(r.Cfg.IsDaily ? "menu" : "next"), App.PlayNext, Style.Primary, 52);
-                next.GetComponent<RectTransform>().Place(new Vector2(0.5f, 0), new Vector2(380, 130), new Vector2(200, 50), new Vector2(0.5f, 0));
+                next.GetComponent<RectTransform>().Place(new Vector2(0.5f, 0), new Vector2(380, 130), new Vector2(215, 50), new Vector2(0.5f, 0));
                 var retry = Button(card, Loc.Get("retry"), App.Retry, Style.Secondary, 44);
-                retry.GetComponent<RectTransform>().Place(new Vector2(0.5f, 0), new Vector2(300, 130), new Vector2(-170, 50), new Vector2(0.5f, 0));
+                retry.GetComponent<RectTransform>().Place(new Vector2(0.5f, 0), new Vector2(300, 130), new Vector2(-140, 50), new Vector2(0.5f, 0));
                 var menu = IconButton(card, Arrow, App.ShowMenu, 100);
                 menu.GetComponent<RectTransform>().Place(new Vector2(0, 0), new Vector2(100, 100), new Vector2(40, 65), new Vector2(0, 0));
                 menu.transform.GetChild(0).localRotation = Quaternion.Euler(0, 0, 90);

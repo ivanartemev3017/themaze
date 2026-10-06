@@ -59,30 +59,30 @@ namespace MazeRunner.EditorTools
                 new ThemeAssets
                 {
                     Id = "sewer",
-                    WallSide = LitMat("Sewer_WallSide", lit, "Bricks097", new Color(0.55f, 0.58f, 0.5f), 0.35f),
-                    WallTop  = LitMat("Sewer_WallTop", lit, "Concrete042A", new Color(0.62f, 0.66f, 0.6f), 0.25f),
-                    Floor    = LitMat("Sewer_Floor", lit, "Concrete031", new Color(0.48f, 0.55f, 0.5f), 0.65f),
-                    Ground   = LitMat("Sewer_Ground", lit, "Concrete042A", new Color(0.16f, 0.2f, 0.18f), 0.4f),
-                    Ambient = new Color(0.12f, 0.18f, 0.15f),
-                    Moon = new Color(0.45f, 0.85f, 0.65f), MoonIntensity = 0.55f,
+                    WallSide = LitMat("Sewer_WallSide", lit, "Bricks097", new Color(0.62f, 0.6f, 0.56f), 0.35f),
+                    WallTop  = LitMat("Sewer_WallTop", lit, "Concrete042A", new Color(0.78f, 0.8f, 0.78f), 0.25f, 0.6f),
+                    Floor    = LitMat("Sewer_Floor", lit, "Concrete031", new Color(0.42f, 0.5f, 0.56f), 0.8f),
+                    Ground   = LitMat("Sewer_Ground", lit, "Concrete042A", new Color(0.12f, 0.15f, 0.16f), 0.4f),
+                    Ambient = new Color(0.14f, 0.17f, 0.19f),
+                    Moon = new Color(0.55f, 0.8f, 0.75f), MoonIntensity = 0.5f,
                     Torch = new Color(1f, 0.72f, 0.4f),
                     Exit = new Color(0.55f, 0.85f, 1f),
-                    EnemyTint = new Color(0.12f, 0.16f, 0.08f),
-                    Background = new Color(0.015f, 0.03f, 0.025f),
+                    EnemyTint = new Color(0.08f, 0.1f, 0.06f),
+                    Background = new Color(0.015f, 0.025f, 0.03f),
                 },
                 new ThemeAssets
                 {
                     Id = "sands",
-                    WallSide = LitMat("Sands_WallSide", lit, "Bricks084", new Color(0.95f, 0.85f, 0.7f), 0.1f),
-                    WallTop  = LitMat("Sands_WallTop", lit, "Ground080", new Color(1f, 0.9f, 0.72f), 0.05f),
-                    Floor    = LitMat("Sands_Floor", lit, "Tiles139", new Color(0.9f, 0.8f, 0.66f), 0.15f),
-                    Ground   = LitMat("Sands_Ground", lit, "Ground080", new Color(0.45f, 0.36f, 0.26f), 0.05f),
-                    Ambient = new Color(0.22f, 0.16f, 0.13f),
-                    Moon = new Color(0.65f, 0.6f, 0.95f), MoonIntensity = 0.6f,
-                    Torch = new Color(1f, 0.6f, 0.28f),
+                    WallSide = LitMat("Sands_WallSide", lit, "Bricks084", new Color(0.95f, 0.82f, 0.62f), 0.1f),
+                    WallTop  = LitMat("Sands_WallTop", lit, "Ground080", new Color(1f, 0.88f, 0.66f), 0.05f, 0.35f),
+                    Floor    = LitMat("Sands_Floor", lit, "Tiles139", new Color(0.82f, 0.68f, 0.48f), 0.15f),
+                    Ground   = LitMat("Sands_Ground", lit, "Ground080", new Color(0.4f, 0.3f, 0.2f), 0.05f, 0.35f),
+                    Ambient = new Color(0.2f, 0.16f, 0.12f),
+                    Moon = new Color(1f, 0.82f, 0.62f), MoonIntensity = 0.55f,
+                    Torch = new Color(1f, 0.62f, 0.3f),
                     Exit = new Color(0.45f, 1f, 0.9f),
-                    EnemyTint = new Color(0.45f, 0.3f, 0.16f),
-                    Background = new Color(0.04f, 0.03f, 0.03f),
+                    EnemyTint = new Color(0.32f, 0.2f, 0.1f),
+                    Background = new Color(0.04f, 0.03f, 0.025f),
                 },
             };
 
@@ -149,13 +149,13 @@ namespace MazeRunner.EditorTools
             return m;
         }
 
-        static Material LitMat(string name, Shader lit, string tex, Color tint, float smooth) => Mat(name, lit, m =>
+        static Material LitMat(string name, Shader lit, string tex, Color tint, float smooth, float bump = 1f) => Mat(name, lit, m =>
         {
             m.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(Tex + tex + "_Color.jpg"));
             m.SetColor("_BaseColor", tint);
             var n = AssetDatabase.LoadAssetAtPath<Texture2D>(Tex + tex + "_Normal.jpg");
             m.SetTexture("_BumpMap", n);
-            m.SetFloat("_BumpScale", 1f);
+            m.SetFloat("_BumpScale", bump);
             if (n != null) m.EnableKeyword("_NORMALMAP"); else m.DisableKeyword("_NORMALMAP");
             m.SetFloat("_Smoothness", smooth);
             m.SetFloat("_Metallic", 0f);

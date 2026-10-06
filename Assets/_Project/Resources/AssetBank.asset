@@ -31,27 +31,27 @@ MonoBehaviour:
     WallTop: {fileID: 2100000, guid: e710f789cda9823469a8794b68255c28, type: 2}
     Floor: {fileID: 2100000, guid: 4bc0597d9af55ed4b800caa46f03bb81, type: 2}
     Ground: {fileID: 2100000, guid: ca27df0424695054ba8ec7c0dca3564f, type: 2}
-    Ambient: {r: 0.12, g: 0.18, b: 0.15, a: 1}
-    Moon: {r: 0.45, g: 0.85, b: 0.65, a: 1}
-    MoonIntensity: 0.55
+    Ambient: {r: 0.14, g: 0.17, b: 0.19, a: 1}
+    Moon: {r: 0.55, g: 0.8, b: 0.75, a: 1}
+    MoonIntensity: 0.5
     Torch: {r: 1, g: 0.72, b: 0.4, a: 1}
     Exit: {r: 0.55, g: 0.85, b: 1, a: 1}
     Accent: {r: 0.95, g: 0.75, b: 0.35, a: 1}
-    EnemyTint: {r: 0.12, g: 0.16, b: 0.08, a: 1}
-    Background: {r: 0.015, g: 0.03, b: 0.025, a: 1}
+    EnemyTint: {r: 0.08, g: 0.1, b: 0.06, a: 1}
+    Background: {r: 0.015, g: 0.025, b: 0.03, a: 1}
   - Id: sands
     WallSide: {fileID: 2100000, guid: f883d4ab7ab7f644eabdc4396a2a1605, type: 2}
     WallTop: {fileID: 2100000, guid: b9636ef0e9bcf9441bb4313a2c4b6ed8, type: 2}
     Floor: {fileID: 2100000, guid: 811ea4847ac4fe443be68df177ef8fb0, type: 2}
     Ground: {fileID: 2100000, guid: 51cf7d0ae0baec64b819f3dead43f444, type: 2}
-    Ambient: {r: 0.22, g: 0.16, b: 0.13, a: 1}
-    Moon: {r: 0.65, g: 0.6, b: 0.95, a: 1}
-    MoonIntensity: 0.6
-    Torch: {r: 1, g: 0.6, b: 0.28, a: 1}
+    Ambient: {r: 0.2, g: 0.16, b: 0.12, a: 1}
+    Moon: {r: 1, g: 0.82, b: 0.62, a: 1}
+    MoonIntensity: 0.55
+    Torch: {r: 1, g: 0.62, b: 0.3, a: 1}
     Exit: {r: 0.45, g: 1, b: 0.9, a: 1}
     Accent: {r: 0.95, g: 0.75, b: 0.35, a: 1}
-    EnemyTint: {r: 0.45, g: 0.3, b: 0.16, a: 1}
-    Background: {r: 0.04, g: 0.03, b: 0.03, a: 1}
+    EnemyTint: {r: 0.32, g: 0.2, b: 0.1, a: 1}
+    Background: {r: 0.04, g: 0.03, b: 0.025, a: 1}
   Player: {fileID: 4416926081852918481, guid: d69c00d62eefa8d4b8447c23a2938aa9, type: 3}
   Spider: {fileID: 1705849404070370923, guid: f6a8b0c2d4e6f8a0b2c4d6e8f0a2b4c6, type: 3}
   SpiderWalk: {fileID: 7400000, guid: a7b9c1d3e5f7a9b1c3d5e7f9a1b3c5d7, type: 2}
