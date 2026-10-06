@@ -98,15 +98,15 @@ namespace MazeRunner.EditorTools
             bank.Glow = Mat("Glow", glowShader, m => m.SetColor("_Color", Color.white));
 
             bank.Player = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/StarterAssets/ThirdPersonController/Prefabs/Player_Arissa.prefab");
-            bank.Spider = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Spiders/SandSpider.prefab");
-            bank.SpiderWalk = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Resources/Spiders/SpiderWalk.anim");
-            bank.SpiderIdle = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Resources/Spiders/SpiderIdle.anim");
-            bank.Hourglass = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Artifacts/hourglass.fbx");
-            bank.Crystal = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Artifacts/crystal.fbx");
-            bank.Ambience = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/dungeon_ambience.wav");
-            bank.Shift = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/stone_sliding.wav");
-            bank.Growl = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/creature_growl.wav");
-            bank.Tick = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/metronome.wav");
+            bank.Spider = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/External/Spiders/SandSpider.prefab");
+            bank.SpiderWalk = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/_Project/Art/External/Spiders/SpiderWalk.anim");
+            bank.SpiderIdle = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/_Project/Art/External/Spiders/SpiderIdle.anim");
+            bank.Hourglass = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/External/Artifacts/hourglass.fbx");
+            bank.Crystal = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/External/Artifacts/crystal.fbx");
+            bank.Ambience = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Art/External/Audio/dungeon_ambience.wav");
+            bank.Shift = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Art/External/Audio/stone_sliding.wav");
+            bank.Growl = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Art/External/Audio/creature_growl.wav");
+            bank.Tick = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Art/External/Audio/metronome.wav");
 
             bank.Font = FontAsset("PTSans-Bold");
             bank.TitleFont = FontAsset("RussoOne-Regular");
