@@ -40,9 +40,9 @@ namespace MazeRunner
             Maze = maze;
             _theme = theme;
             var bank = AssetBank.I;
-            _warnClose = new Material(bank.Glow); _warnClose.SetColor("_Color", new Color(1f, 0.18f, 0.1f, 1.6f)); _warnClose.SetFloat("_Shape", 1);
-            _warnOpen = new Material(bank.Glow);  _warnOpen.SetColor("_Color", new Color(0.2f, 0.75f, 1f, 1.4f));  _warnOpen.SetFloat("_Shape", 1);
-            _stripMesh = MeshKit.FlatQuad(Cell + 0.4f, 1.6f);
+            _warnClose = new Material(bank.Glow); _warnClose.SetColor("_Color", new Color(1f, 0.18f, 0.1f, 1.6f)); _warnClose.SetFloat("_Shape", 1); _warnClose.SetFloat("_Softness", 1.1f);
+            _warnOpen = new Material(bank.Glow);  _warnOpen.SetColor("_Color", new Color(0.2f, 0.75f, 1f, 1.4f));  _warnOpen.SetFloat("_Shape", 1); _warnOpen.SetFloat("_Softness", 1.1f);
+            _stripMesh = MeshKit.FlatQuad(Cell + 0.6f, 2.6f);
 
             BuildFloor();
             BuildFixedWalls();
@@ -209,9 +209,9 @@ namespace MazeRunner
         void Update()
         {
             if (_markers.Count == 0) return;
-            float pulse = 0.65f + 0.35f * Mathf.Sin(Time.time * 14f);
-            _warnClose.SetColor("_Color", new Color(1f, 0.18f, 0.1f, 1.8f * pulse));
-            _warnOpen.SetColor("_Color", new Color(0.2f, 0.75f, 1f, 1.5f * pulse));
+            float pulse = 0.8f + 0.2f * Mathf.Sin(Time.time * 14f);
+            _warnClose.SetColor("_Color", new Color(1f, 0.2f, 0.1f, 2.8f * pulse));
+            _warnOpen.SetColor("_Color", new Color(0.25f, 0.75f, 1f, 2.4f * pulse));
         }
     }
 }

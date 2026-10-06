@@ -252,6 +252,26 @@ namespace MazeRunner.EditorTools
             PlayerSettings.allowedAutorotateToPortrait = false;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
             PlayerSettings.SplashScreen.showUnityLogo = false;
+            PlayerSettings.productName = "The Maze";
+            PlayerSettings.bundleVersion = "1.0.0";
+            if (PlayerSettings.Android.bundleVersionCode < 18) PlayerSettings.Android.bundleVersionCode = 18;
+
+            const string iconPath = Root + "/Art/Icon.png";
+            var imp = (TextureImporter)AssetImporter.GetAtPath(iconPath);
+            if (imp != null && (imp.maxTextureSize != 1024 || imp.mipmapEnabled))
+            {
+                imp.maxTextureSize = 1024; imp.mipmapEnabled = false; imp.textureCompression = TextureImporterCompression.Uncompressed;
+                imp.SaveAndReimport();
+            }
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath);
+            if (icon != null)
+            {
+                PlayerSettings.SetIcons(UnityEditor.Build.NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
+                var sizes = PlayerSettings.GetIconSizes(UnityEditor.Build.NamedBuildTarget.Android, IconKind.Any);
+                var arr = new Texture2D[sizes.Length];
+                for (int i = 0; i < arr.Length; i++) arr[i] = icon;
+                PlayerSettings.SetIcons(UnityEditor.Build.NamedBuildTarget.Android, arr, IconKind.Any);
+            }
         }
     }
 }
