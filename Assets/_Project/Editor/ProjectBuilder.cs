@@ -32,6 +32,7 @@ namespace MazeRunner.EditorTools
             Directory.CreateDirectory(Root + "/Art/Post");
 
             ConfigureTextures();
+            ConfigureSizeBudget();
             var bank = AssetDatabase.LoadAssetAtPath<AssetBank>(BankPath);
             if (bank == null)
             {
@@ -134,6 +135,38 @@ namespace MazeRunner.EditorTools
                 if (imp.maxTextureSize != 1024) { imp.maxTextureSize = 1024; changed = true; }
                 if (imp.anisoLevel != 4) { imp.anisoLevel = 4; changed = true; }
                 if (changed) imp.SaveAndReimport();
+            }
+        }
+
+        /// <summary>Keeps the APK small: compressed audio, tiny textures for the spider (its materials are replaced at runtime).</summary>
+        static void ConfigureSizeBudget()
+        {
+            foreach (var guid in AssetDatabase.FindAssets("t:AudioClip", new[] { Root + "/Art/External/Audio" }))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                var imp = (AudioImporter)AssetImporter.GetAtPath(path);
+                var set = imp.defaultSampleSettings;
+                bool loop = path.Contains("ambience");
+                var want = new AudioImporterSampleSettings
+                {
+                    compressionFormat = AudioCompressionFormat.Vorbis,
+                    quality = 0.45f,
+                    loadType = loop ? AudioClipLoadType.Streaming : AudioClipLoadType.CompressedInMemory,
+                    sampleRateSetting = AudioSampleRateSetting.OverrideSampleRate,
+                    sampleRateOverride = 22050,
+                    preloadAudioData = !loop,
+                };
+                if (set.compressionFormat != want.compressionFormat || set.loadType != want.loadType || !imp.forceToMono || set.sampleRateOverride != 22050)
+                {
+                    imp.forceToMono = true;
+                    imp.defaultSampleSettings = want;
+                    imp.SaveAndReimport();
+                }
+            }
+            foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets/Spiders/Textures" }))
+            {
+                var imp = (TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid));
+                if (imp.maxTextureSize != 64) { imp.maxTextureSize = 64; imp.SaveAndReimport(); }
             }
         }
 
